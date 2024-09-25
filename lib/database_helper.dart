@@ -27,6 +27,36 @@ class DatabaseHelper {
     return await openDatabase(path);
   }
 
+  // Count employees with specific status
+  Future<int> getCountByStatus(int status) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM t_pegawai WHERE id_status_keaktifan = ?',
+      [status],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+ // Retrieve counts for specific id_status_kepegawaian (1, 2, 3, 4, 10)
+Future<List<int>> getStatusCounts() async {
+  final db = await database;
+  List<int> counts = [];
+  List<int> ids = [1, 2, 3, 4, 10]; // Change to 1, 2, 3, 4, 10
+
+  for (int id in ids) {
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM t_pegawai WHERE id_status_kepegawaian = ?',
+      [id],
+    );
+    counts.add(Sqflite.firstIntValue(result) ?? 0);
+  }
+
+  return counts;
+}
+
+
+
+  // Login function remains unchanged
   Future<bool> login(String nip, String password) async {
     final db = await database;
     final List<Map<String, dynamic>> results = await db.rawQuery(
@@ -36,3 +66,4 @@ class DatabaseHelper {
     return results.isNotEmpty;
   }
 }
+
