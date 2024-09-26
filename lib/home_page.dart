@@ -6,6 +6,9 @@ import 'database_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class HomePage extends StatefulWidget {
+   final String idPegawai; // Add idPegawai as a parameter
+  
+  HomePage({required this.idPegawai});
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -34,11 +37,11 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: buildAppBar(_scaffoldKey, 'Dashboard'),
-      drawer: buildDrawer(context),
+       drawer: buildDrawer(context, widget.idPegawai),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
+          child: Column(  
             children: [
               GridView.count(
                 crossAxisCount: 2,

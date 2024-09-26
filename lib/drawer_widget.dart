@@ -7,7 +7,7 @@ import 'family_page.dart';
 import 'wage_page.dart';
 import 'home_page.dart';
 
-Drawer buildDrawer(BuildContext context) {
+Drawer buildDrawer(BuildContext context, String idPegawai) {
   return Drawer(
     child: ListView(
       padding: EdgeInsets.zero,
@@ -29,7 +29,7 @@ Drawer buildDrawer(BuildContext context) {
           onTap: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => HomePage(idPegawai: idPegawai)),
             );
           },
         ),
@@ -37,9 +37,11 @@ Drawer buildDrawer(BuildContext context) {
           leading: Icon(Icons.person),
           title: Text('Profile Pegawai'),
           onTap: () {
-            Navigator.push(
+            Navigator.push( 
               context,
-              MaterialPageRoute(builder: (context) => ProfilePage()),
+              MaterialPageRoute(
+                builder: (context) => ProfilePage(idPegawai: idPegawai), // Pass idPegawai here
+              ),
             );
           },
         ),
@@ -49,7 +51,7 @@ Drawer buildDrawer(BuildContext context) {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ClassPage()),
+              MaterialPageRoute(builder: (context) => ClassPage(idPegawai: idPegawai)),
             );
           },
         ),
@@ -59,7 +61,7 @@ Drawer buildDrawer(BuildContext context) {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => CareerPage()),
+              MaterialPageRoute(builder: (context) => CareerPage(idPegawai: idPegawai)),
             );
           },
         ),
@@ -69,7 +71,7 @@ Drawer buildDrawer(BuildContext context) {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => EducationPage()),
+              MaterialPageRoute(builder: (context) => EducationPage(idPegawai: idPegawai)),
             );
           },
         ),
@@ -79,7 +81,7 @@ Drawer buildDrawer(BuildContext context) {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => FamilyPage()),
+              MaterialPageRoute(builder: (context) => FamilyPage(idPegawai: idPegawai)),
             );
           },
         ),
@@ -89,7 +91,7 @@ Drawer buildDrawer(BuildContext context) {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => WagePage()),
+              MaterialPageRoute(builder: (context) => WagePage(idPegawai: idPegawai)),
             );
           },
         ),

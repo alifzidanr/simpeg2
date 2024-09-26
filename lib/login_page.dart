@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
-import 'home_page.dart';  // <-- Add this import
+import 'home_page.dart';  // <-- Ensure this import is present
 
 class LoginPage extends StatefulWidget {
   @override
@@ -8,22 +8,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _nipController = TextEditingController();
+  final TextEditingController _idPegawaiController = TextEditingController();  // <-- Changed controller name
   final TextEditingController _passwordController = TextEditingController();
 
   void _login() async {
-    String nip = _nipController.text;
+    String idPegawai = _idPegawaiController.text;  // <-- Changed field to id_pegawai
     String password = _passwordController.text;
 
-    bool success = await DatabaseHelper().login(nip, password);
+    bool success = await DatabaseHelper().login(idPegawai, password);  // <-- Pass id_pegawai instead of nip
     if (success) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),  // HomePage is now recognized
+        MaterialPageRoute(builder: (context) => HomePage(idPegawai: idPegawai)),  // Pass idPegawai here
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed. Incorrect NIP or password.')),
+        SnackBar(content: Text('Login failed. Incorrect ID Pegawai or password.')),
       );
     }
   }
@@ -38,8 +38,8 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _nipController,
-              decoration: InputDecoration(labelText: 'NIP'),
+              controller: _idPegawaiController,  // <-- Changed input field to id_pegawai
+              decoration: InputDecoration(labelText: 'ID Pegawai'),  // <-- Updated label
             ),
             TextField(
               controller: _passwordController,

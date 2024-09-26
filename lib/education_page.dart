@@ -3,6 +3,9 @@ import 'app_bar_widget.dart';
 import 'drawer_widget.dart';
 
 class EducationPage extends StatelessWidget {
+   final String idPegawai; // Add idPegawai as a parameter
+  
+  EducationPage({required this.idPegawai});
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -10,7 +13,7 @@ class EducationPage extends StatelessWidget {
     return Scaffold(
       key: _scaffoldKey,
       appBar: buildAppBar(_scaffoldKey, 'Riwayat Pendidikan'),
-      drawer: buildDrawer(context),
+      drawer: buildDrawer(context, idPegawai),
       body: Center(child: Text('Riwayat Pendidikan Page')),
     );
   }
