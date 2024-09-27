@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'database_helper.dart'; // Import your DatabaseHelper
 import 'drawer_widget.dart'; // Import your drawer widget
 import 'app_bar_widget.dart'; // Import your app bar widget
+// import 'package:google_fonts/google_fonts.dart';
 
 class ProfilePage extends StatefulWidget {
   final String idPegawai; // Pass the idPegawai to the ProfilePage
@@ -40,76 +41,107 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    key: _scaffoldKey,
-    appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai'),
-    drawer: buildDrawer(context, widget.idPegawai),
-    body: profileData == null
-        ? Center(child: CircularProgressIndicator())
-        : Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 15.0), // Add 15px top padding
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildReadOnlyTextField(label: 'Nama Lengkap', value: profileData!['nama_lengkap']),
-                    SizedBox(height: 16), // Add vertical space
-                    _buildReadOnlyTextField(label: 'NIP', value: profileData!['nip']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Jabatan Pegawai', value: profileData!['jabatan_pegawai']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Unit Kerja', value: _formatUnitKerja(profileData!['unit_kerja'] ?? 'N/A')),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Status Pegawai', value: profileData!['status_pegawai']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Gelar Depan', value: profileData!['gelar_depan']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Gelar Belakang', value: profileData!['gelar_belakang']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Bidang Diampu', value: profileData!['bidang_diampu']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Tempat, Tanggal Lahir', value: '${profileData!['tempat_lahir'] ?? 'N/A'}, ${profileData!['tgl_lahir'] ?? 'N/A'}'),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'KTP', value: profileData!['no_ktp']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'NPWP', value: profileData!['npwp']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Jenis Kelamin', value: profileData!['jenis_kelamin']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Status Menikah', value: profileData!['status_nikah']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Golongan Darah', value: profileData!['golongan_darah']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Regional', value: profileData!['regional']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Alamat', value: profileData!['alamat']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Kota', value: profileData!['kota']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Provinsi', value: profileData!['propinsi']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Kode Pos', value: profileData!['kode_pos']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'No. Telepon', value: profileData!['no_telepon']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'No. Handphone', value: profileData!['no_hp']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Email', value: profileData!['email']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Ayah Kandung', value: profileData!['ayah_kandung']),
-                    SizedBox(height: 16),
-                    _buildReadOnlyTextField(label: 'Ibu Kandung', value: profileData!['ibu_kandung']),
-                  ],
+ @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai'),
+      drawer: buildDrawer(context, widget.idPegawai),
+      body: profileData == null
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 15.0), // Add top padding
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: _buildProfileImage(profileData!['url_foto']),
+                      ),
+                      SizedBox(height: 24), // Add spacing below the image
+                      _buildReadOnlyTextField(label: 'Nama Lengkap', value: profileData!['nama_lengkap']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'NIP', value: profileData!['nip']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Jabatan Pegawai', value: profileData!['jabatan_pegawai']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Unit Kerja', value: _formatUnitKerja(profileData!['unit_kerja'] ?? 'N/A')),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Status Pegawai', value: profileData!['status_pegawai']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Gelar Depan', value: profileData!['gelar_depan']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Gelar Belakang', value: profileData!['gelar_belakang']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Bidang Diampu', value: profileData!['bidang_diampu']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Tempat, Tanggal Lahir', value: '${profileData!['tempat_lahir'] ?? 'N/A'}, ${profileData!['tgl_lahir'] ?? 'N/A'}'),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'KTP', value: profileData!['no_ktp']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'NPWP', value: profileData!['npwp']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Jenis Kelamin', value: profileData!['jenis_kelamin']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Status Menikah', value: profileData!['status_nikah']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Golongan Darah', value: profileData!['golongan_darah']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Regional', value: profileData!['regional']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Alamat', value: profileData!['alamat']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Kota', value: profileData!['kota']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Provinsi', value: profileData!['propinsi']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Kode Pos', value: profileData!['kode_pos']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'No. Telepon', value: profileData!['no_telepon']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'No. Handphone', value: profileData!['no_hp']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Email', value: profileData!['email']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Ayah Kandung', value: profileData!['ayah_kandung']),
+                      SizedBox(height: 16),
+                      _buildReadOnlyTextField(label: 'Ibu Kandung', value: profileData!['ibu_kandung']),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-  );
-}
+    );
+  }
+
+  // Method to build the profile image or fallback icon
+  Widget _buildProfileImage(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return Icon(
+        Icons.account_circle, // Fallback icon
+        size: 120.0, // Icon size
+        color: Colors.grey,
+      );
+    } else {
+      return ClipOval(
+        child: Image.network(
+          imageUrl,
+          width: 120.0, // Image width
+          height: 120.0, // Image height
+          fit: BoxFit.cover, // Make the image cover the circle
+          errorBuilder: (context, error, stackTrace) {
+            return Icon(
+              Icons.account_circle, // Fallback if image loading fails
+              size: 120.0,
+              color: Colors.grey,
+            );
+          },
+        ),
+      );
+    }
+  }
 
   // Method to format the unit kerja string
   String _formatUnitKerja(String unitKerja) {
