@@ -55,24 +55,34 @@ class DatabaseHelper {
 
   Future<Map<String, dynamic>?> getEmployeeProfile(String idPegawai) async {
   try {
-    final db = await database; // Get the database instance
-    final result = await db.query(
-      't_pegawai', // Make sure this is the correct table name
-      where: 'id_pegawai = ?', // Make sure this matches your database schema
-      whereArgs: [idPegawai],
-    );
-
-    print('Query result: $result'); // Print the result of the query
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT p.*, 
+        rj.nama_jabatan AS jabatan_pegawai,
+        SUBSTR(ru.nama_unit, INSTR(ru.nama_unit, '-') + 1) AS unit_kerja,
+        rs.kode AS status_pegawai,
+        bd.nama_bidang AS bidang_diampu,
+        sn.status_nikah,
+        rg.nama_wilayah AS regional
+      FROM t_pegawai AS p
+      JOIN t_pegawai_jabatan AS pj ON p.id_pegawai = pj.id_pegawai
+      JOIN t_ref_jabatan_pegawai AS rj ON pj.id_ref_jabatan_pegawai = rj.id_ref_jabatan_pegawai
+      JOIN t_ref_unit_kerja AS ru ON pj.id_unit_kerja = ru.id_unit_kerja
+      JOIN t_ref_status_pegawai AS rs ON pj.id_status_pegawai = rs.id_status_pegawai
+      JOIN t_ref_bidang_diampu AS bd ON p.id_bidang_diampu = bd.id_bidang_diampu
+      JOIN t_ref_status_nikah AS sn ON p.id_status_nikah = sn.id_status_nikah
+      JOIN t_ref_regional AS rg ON p.id_regional = rg.id_regional
+      WHERE p.id_pegawai = ?
+    ''', [idPegawai]);
 
     if (result.isNotEmpty) {
-      return result.first; // Return the first record
+      return result.first;
     }
   } catch (e) {
-    print('Error fetching employee profile: $e'); // Log any errors
+    print('Error fetching employee profile: $e');
   }
-  return null; // Return null if no data found or an error occurred
+  return null;
 }
-
 
 
   // Updated login function to use id_pegawai instead of nip
