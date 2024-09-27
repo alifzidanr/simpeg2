@@ -63,8 +63,7 @@ class DatabaseHelper {
         rs.kode AS status_pegawai,
         bd.nama_bidang AS bidang_diampu,
         sn.status_nikah,
-        rg.nama_wilayah AS regional,
-        p.url_foto AS url_foto -- Fetch url_foto from t_pegawai
+        rg.nama_wilayah AS regional
       FROM t_pegawai AS p
       JOIN t_pegawai_jabatan AS pj ON p.id_pegawai = pj.id_pegawai
       JOIN t_ref_jabatan_pegawai AS rj ON pj.id_ref_jabatan_pegawai = rj.id_ref_jabatan_pegawai

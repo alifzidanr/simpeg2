@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'database_helper.dart'; // Import your DatabaseHelper
 import 'drawer_widget.dart'; // Import your drawer widget
 import 'app_bar_widget.dart'; // Import your app bar widget
-// import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfilePage extends StatefulWidget {
   final String idPegawai; // Pass the idPegawai to the ProfilePage
@@ -15,7 +16,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   Map<String, dynamic>? profileData;
 
   @override
@@ -28,10 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       print('Fetching profile for ID Pegawai: ${widget.idPegawai}');
       profileData = await DatabaseHelper().getEmployeeProfile(widget.idPegawai);
-
-      // Log the profile data
       print('Profile data: $profileData');
-
       setState(() {}); // Update the UI
     } catch (e) {
       print('Error fetching profile data: $e');
@@ -41,7 +38,70 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
- @override
+  Future<void> _showImageOptions() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Profile Photo'),
+          content: Text('What would you like to do?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _requestFilePermission();
+              },
+              child: Text('Change Photo'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Implement the delete photo logic here
+                _deletePhoto();
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete Photo'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _requestFilePermission() async {
+    final status = await Permission.storage.request();
+    if (status.isGranted) {
+      _pickImage();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Permission denied!')),
+      );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (pickedFile != null) {
+      // Upload the image or update the profile with the new image
+      print('Image selected: ${pickedFile.path}');
+      // Here you can add the logic to upload the image and update the profileData
+    }
+  }
+
+  void _deletePhoto() {
+    // Implement logic to delete the photo from the database
+    print('Photo deleted');
+    setState(() {
+      profileData!['url_foto'] = null; // Update the profileData to reflect the change
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -53,14 +113,15 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 15.0), // Add top padding
+                  padding: const EdgeInsets.only(top: 15.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
-                        child: _buildProfileImage(profileData!['url_foto']),
+                      GestureDetector(
+                        onTap: _showImageOptions, // Show options on tap
+                        child: _buildProfileImage(),
                       ),
-                      SizedBox(height: 24), // Add spacing below the image
+                      SizedBox(height: 16),
                       _buildReadOnlyTextField(label: 'Nama Lengkap', value: profileData!['nama_lengkap']),
                       SizedBox(height: 16),
                       _buildReadOnlyTextField(label: 'NIP', value: profileData!['nip']),
@@ -116,55 +177,40 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Method to build the profile image or fallback icon
-  Widget _buildProfileImage(String? imageUrl) {
-    if (imageUrl == null || imageUrl.isEmpty) {
-      return Icon(
-        Icons.account_circle, // Fallback icon
-        size: 120.0, // Icon size
-        color: Colors.grey,
-      );
-    } else {
-      return ClipOval(
-        child: Image.network(
-          imageUrl,
-          width: 120.0, // Image width
-          height: 120.0, // Image height
-          fit: BoxFit.cover, // Make the image cover the circle
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(
-              Icons.account_circle, // Fallback if image loading fails
-              size: 120.0,
-              color: Colors.grey,
-            );
-          },
-        ),
-      );
-    }
+  // Method to create the profile image widget
+  Widget _buildProfileImage() {
+    String? imageUrl = profileData?['url_foto'];
+    return Center(
+      child: imageUrl == null || imageUrl.isEmpty
+          ? Icon(Icons.account_circle, size: 100) // Fallback icon if no image
+          : ClipOval(
+              child: Image.network(
+                imageUrl,
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(Icons.error, size: 100); // Error icon
+                },
+              ),
+            ),
+    );
   }
 
-  // Method to format the unit kerja string
+  // Method to format Unit Kerja (you can modify the logic as needed)
   String _formatUnitKerja(String unitKerja) {
-    // Split the string based on the separator, e.g., '-'
-    var parts = unitKerja.split('-');
-    if (parts.length > 1) {
-      return parts[1].trim(); // Return the middle part (desired unit name)
-    }
-    return unitKerja; // Return the original string if the format is unexpected
+    return unitKerja.isEmpty ? 'N/A' : unitKerja;
   }
 
- 
-  // Helper method to create read-only text fields with floating labels
-Widget _buildReadOnlyTextField({required String label, String? value}) {
-  return TextField(
-    decoration: InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(),
-    ),
-    readOnly: true,
-    controller: TextEditingController(text: value ?? 'N/A'), // Fallback to 'N/A' if value is null
-  );
+  // Method to create read-only text fields
+  Widget _buildReadOnlyTextField({required String label, required String? value}) {
+    return TextField(
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+      readOnly: true,
+      controller: TextEditingController(text: value),
+    );
+  }
 }
-
-}
-
