@@ -3,6 +3,7 @@ import 'app_bar_widget.dart';
 import 'drawer_widget.dart';
 import 'database_helper.dart';
 import 'package:data_table_2/data_table_2.dart';
+import 'package:intl/intl.dart'; // Import the intl package
 
 class FamilyPage extends StatelessWidget {
   final String idPegawai;
@@ -38,22 +39,120 @@ class FamilyPage extends StatelessWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Container(
-                width: 1200, // Set a fixed width for the table
+                width: MediaQuery.of(context).size.width,
                 child: DataTable2(
-                  columnSpacing: 12,
-                  minWidth: 800,
-                  columns: const [
-                    DataColumn(label: Text('No')),
-                    DataColumn(label: Text('Nama Lengkap')),
-                    DataColumn(label: Text('Jenis Kelamin')),
-                    DataColumn(label: Text('Tempat Lahir')),
-                    DataColumn(label: Text('Tanggal Lahir')),
-                    DataColumn(label: Text('Status Keluarga')),
-                    DataColumn(label: Text('Status Nikah')),
-                    DataColumn(label: Text('Pekerjaan')),
-                    DataColumn(label: Text('Status Hidup')),
-                    DataColumn(label: Text('Usia')),
-                    DataColumn(label: Text('Tunjangan')),
+                  columnSpacing: 18,
+                  minWidth: 1100, // Increase the minimum width
+                  headingRowHeight: 70, // Set the height for the entire heading row
+                  columns: [
+                    DataColumn(label: Container(child: Text('No'))),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Nama', style: TextStyle(fontSize: 14)),
+                            Text('Lengkap', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Jenis', style: TextStyle(fontSize: 14)),
+                            Text('Kelamin', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Tempat', style: TextStyle(fontSize: 14)),
+                            Text('Lahir', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Tanggal', style: TextStyle(fontSize: 14)),
+                            Text('Lahir', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Status', style: TextStyle(fontSize: 14)),
+                            Text('Keluarga', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Status', style: TextStyle(fontSize: 14)),
+                            Text('Nikah', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Pekerjaan', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Status', style: TextStyle(fontSize: 14)),
+                            Text('Hidup', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Usia', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Tunjangan', style: TextStyle(fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                   rows: List.generate(familyData.length, (index) {
                     final item = familyData[index];
@@ -63,7 +162,7 @@ class FamilyPage extends StatelessWidget {
                         DataCell(Text(item['nama_lengkap'] ?? '')), // Nama Lengkap
                         DataCell(Text(item['jenis_kelamin'] ?? '')), // Jenis Kelamin
                         DataCell(Text(item['tempat_lahir'] ?? '')), // Tempat Lahir
-                        DataCell(Text(item['tgl_lahir'] ?? '')), // Tanggal Lahir
+                        DataCell(Text(_formatDate(item['tgl_lahir']))), // Tanggal Lahir
                         DataCell(Text(item['status_keluarga'] ?? '')), // Status Keluarga
                         DataCell(Text(item['status_nikah'] ?? '')), // Status Nikah
                         DataCell(Text(item['pekerjaan'] ?? '')), // Pekerjaan
@@ -80,5 +179,12 @@ class FamilyPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  // Function to format the date
+  String _formatDate(String? date) {
+    if (date == null) return '';
+    DateTime parsedDate = DateTime.parse(date); // Assuming the date is in ISO format
+    return DateFormat('dd-MM-yy').format(parsedDate); // Format to dd-mm-yy
   }
 }
