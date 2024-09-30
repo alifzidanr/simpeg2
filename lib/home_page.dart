@@ -33,41 +33,40 @@ void initState() {
 }
 
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Dashboard'),
-       drawer: buildDrawer(context, widget.idPegawai),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(  
-            children: [
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20,
-                childAspectRatio: 2 / 1.5,
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount),
-                  _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount),
-                  _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount),
-                  _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount),
-                ],
-              ),
-              SizedBox(height: 20),
-              _buildBarChart(), // Add the bar chart
-              SizedBox(height: 20),
-              _buildPieChart(), // Add the pie chart
-            ],
-          ),
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    key: _scaffoldKey,
+    appBar: buildAppBar(_scaffoldKey, 'Dashboard'),
+    drawer: buildDrawer(context, widget.idPegawai),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            GridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 20,
+              mainAxisSpacing: 20,
+              childAspectRatio: 2 / 1.5,
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount),
+                _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount),
+                _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount),
+                _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount),
+              ],
+            ),
+            _buildPieChart(), 
+            SizedBox(height: 20),
+            _buildBarChart(), 
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatCard(String label, IconData icon, Color color, Future<int> countFuture) {
     return FutureBuilder<int>(
@@ -165,7 +164,7 @@ Widget _buildPieChart() {
       List<double> percentages = counts.map((count) => (count / total) * 100).toList();
 
       return Padding(
-        padding: const EdgeInsets.only(top: 30.0),
+        padding: const EdgeInsets.only(top: 1.0),
         child: Column(
           children: [
             SizedBox(

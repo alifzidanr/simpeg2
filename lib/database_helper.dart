@@ -82,6 +82,35 @@ class DatabaseHelper {
   return null;
 }
 
+Future<List<Map<String, dynamic>>> getFamilyData(String idPegawai) async {
+  final db = await database;
+  final result = await db.rawQuery('''
+    SELECT pk.nama_lengkap, 
+           pk.jenis_kelamin, 
+           pk.tempat_lahir, 
+           pk.tgl_lahir, 
+           rs.status_keluarga, 
+           sn.status_nikah, 
+           pk.pekerjaan, 
+           pk.status_hidup, 
+           CASE 
+             WHEN pk.tgl_lahir IS NOT NULL 
+             THEN strftime('%Y', 'now') - strftime('%Y', pk.tgl_lahir) 
+             ELSE NULL 
+           END AS usia,
+           pk.tunjangan
+    FROM t_pegawai_keluarga AS pk
+    JOIN t_ref_status_keluarga AS rs ON pk.id_status_keluarga = rs.id_status_keluarga
+    JOIN t_ref_status_nikah AS sn ON pk.id_status_nikah = sn.id_status_nikah
+    WHERE pk.id_pegawai = ?
+  ''', [idPegawai]);
+
+  // Debugging line to check the result of the query
+  print('Fetched family data: $result');
+
+  return result;
+}
+
 
  Future<void> updateEmployeePhoto(String idPegawai, String base64Image) async {
     final db = await database;
