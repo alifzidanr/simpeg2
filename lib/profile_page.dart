@@ -4,15 +4,19 @@ import 'drawer_widget.dart'; // Import your drawer widget
 import 'app_bar_widget.dart'; // Import your app bar widget
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:convert'; // For base64 encoding/decoding
+import 'package:intl/intl.dart';
+
 
 class ProfilePage extends StatefulWidget {
-  final String idPegawai; // Pass the idPegawai to the ProfilePage
+  final String idPegawai; // Change it back to String
 
-  ProfilePage({required this.idPegawai});
+  const ProfilePage({Key? key, required this.idPegawai}) : super(key: key); // Ensure the constructor is consistent
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
+
 
 class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -27,7 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _fetchProfileData() async {
     try {
       print('Fetching profile for ID Pegawai: ${widget.idPegawai}');
-      profileData = await DatabaseHelper().getEmployeeProfile(widget.idPegawai);
+      profileData = await DatabaseHelper.instance.getEmployeeProfile(widget.idPegawai);
       print('Profile data: $profileData');
       setState(() {}); // Update the UI
     } catch (e) {
@@ -36,7 +40,8 @@ class _ProfilePageState extends State<ProfilePage> {
         SnackBar(content: Text('Failed to fetch profile data')),
       );
     }
-  }
+}
+
 
   Future<void> _showImageOptions() async {
     showDialog(
@@ -70,7 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
       },
     );
   }
-
+  
   Future<void> _requestFilePermission() async {
     final status = await Permission.storage.request();
     if (status.isGranted) {
@@ -82,24 +87,57 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    
-    if (pickedFile != null) {
-      // Upload the image or update the profile with the new image
-      print('Image selected: ${pickedFile.path}');
-      // Here you can add the logic to upload the image and update the profileData
-    }
-  }
+ Future<void> _pickImage() async {
+  final picker = ImagePicker();
+  final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  
+  if (pickedFile != null) {
+    try {
+      final bytes = await pickedFile.readAsBytes();
+      final base64Image = base64Encode(bytes);
+      
+      // Now you can use DatabaseHelper.instance to update the image
+      await DatabaseHelper.instance.updateEmployeePhoto(widget.idPegawai, base64Image);
 
-  void _deletePhoto() {
-    // Implement logic to delete the photo from the database
-    print('Photo deleted');
-    setState(() {
-      profileData!['url_foto'] = null; // Update the profileData to reflect the change
-    });
+      print('Image uploaded/updated: ${pickedFile.path}');
+
+      // Show a SnackBar to inform the user that the image was uploaded successfully
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Image uploaded successfully!')),
+      );
+
+      // Refresh the profile data
+      await _fetchProfileData();  // Call to fetch updated data
+    } catch (e) {
+      print('Error picking image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error uploading image!')),
+      );
+    }
+  } else {
+    print('No image selected.');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('No image selected.')),
+    );
   }
+}
+
+
+void _deletePhoto() async {
+  await DatabaseHelper.instance.deleteEmployeePhoto(widget.idPegawai); // Delete photo from database
+
+  // Fetch the updated profile data after deletion
+  await _fetchProfileData(); // Call to fetch updated data
+
+  // Show confirmation message
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Photo deleted successfully!')),
+  );
+
+  print('Photo deleted');
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +151,19 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 15.0),
+                  padding: const EdgeInsets.only(top: 5.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      GestureDetector(
-                        onTap: _showImageOptions, // Show options on tap
-                        child: _buildProfileImage(),
+                  // Centering the profile image in the layout
+                       Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15.0), // Adjust vertical padding as needed
+                          child: GestureDetector(
+                            onTap: _showImageOptions,
+                            child: _buildProfileImage(),
+                          ),
+                        ),
                       ),
                       SizedBox(height: 16),
                       _buildReadOnlyTextField(label: 'Nama Lengkap', value: profileData!['nama_lengkap']),
@@ -138,7 +182,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       SizedBox(height: 16),
                       _buildReadOnlyTextField(label: 'Bidang Diampu', value: profileData!['bidang_diampu']),
                       SizedBox(height: 16),
-                      _buildReadOnlyTextField(label: 'Tempat, Tanggal Lahir', value: '${profileData!['tempat_lahir'] ?? 'N/A'}, ${profileData!['tgl_lahir'] ?? 'N/A'}'),
+                      _buildReadOnlyTextField(
+                        label: 'Tempat, Tanggal Lahir',
+                        value: '${profileData!['tempat_lahir'] ?? 'N/A'}, ${_formatDate(profileData!['tgl_lahir'])}',
+                      ),
                       SizedBox(height: 16),
                       _buildReadOnlyTextField(label: 'KTP', value: profileData!['no_ktp']),
                       SizedBox(height: 16),
@@ -177,30 +224,87 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Method to create the profile image widget
-  Widget _buildProfileImage() {
-    String? imageUrl = profileData?['url_foto'];
-    return Center(
-      child: imageUrl == null || imageUrl.isEmpty
-          ? Icon(Icons.account_circle, size: 100) // Fallback icon if no image
-          : ClipOval(
-              child: Image.network(
-                imageUrl,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(Icons.error, size: 100); // Error icon
-                },
-              ),
+ Widget _buildProfileImage() {
+  print('Profile image URL: ${profileData!['url_foto']}'); // Debugging line
+  if (profileData != null && profileData!['url_foto'] != null) {
+    if (profileData!['url_foto'].startsWith('http')) {
+      // Image from a URL
+      return Center(
+        child: ClipOval(
+          child: Image.network(
+            profileData!['url_foto'],
+            height: 120,
+            width: 120,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Icon(Icons.error, size: 120);
+            },
+          ),
+        ),
+      );
+    } else {
+      try {
+        // Image is base64 encoded
+        final decodedBytes = base64Decode(profileData!['url_foto']);
+        return Center(
+          child: ClipOval(
+            child: Image.memory(
+              decodedBytes,
+              height: 150,
+              width: 150,
+              fit: BoxFit.cover,
             ),
+          ),
+        );
+      } catch (e) {
+        print('Error decoding base64 image: $e');
+        return Center(
+          child: ClipOval(
+            child: Icon(Icons.error, size: 150),
+          ),
+        );
+      }
+    }
+  } else {
+    // Default icon
+    return Center(
+      child: ClipOval(
+        child: Icon(Icons.account_circle, size: 150),
+      ),
     );
   }
+}
+
 
   // Method to format Unit Kerja (you can modify the logic as needed)
   String _formatUnitKerja(String unitKerja) {
-    return unitKerja.isEmpty ? 'N/A' : unitKerja;
+  if (unitKerja.isEmpty) {
+    return 'N/A';
   }
+
+  // Remove 'TRIAL-' prefix
+  if (unitKerja.startsWith('TRIAL-')) {
+    unitKerja = unitKerja.replaceFirst('TRIAL-', '');
+  }
+
+  // Remove the numeric suffix after the last '-'
+  int lastDashIndex = unitKerja.lastIndexOf('-');
+  if (lastDashIndex != -1) {
+    unitKerja = unitKerja.substring(0, lastDashIndex);
+  }
+
+  return unitKerja;
+}
+
+String _formatDate(String? date) {
+  if (date == null || date.isEmpty) return 'N/A';
+  try {
+    final DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('dd-MM-yy').format(parsedDate);
+  } catch (e) {
+    return 'N/A'; // Return 'N/A' if the date is invalid
+  }
+}
 
   // Method to create read-only text fields
   Widget _buildReadOnlyTextField({required String label, required String? value}) {

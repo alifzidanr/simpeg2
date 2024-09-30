@@ -23,14 +23,15 @@ class _HomePageState extends State<HomePage> {
   late Future<List<int>> statusCounts; // For the bar chart
 
   @override
-  void initState() {
-    super.initState();
-    aktifCount = DatabaseHelper().getCountByStatus(1);
-    keluarCount = DatabaseHelper().getCountByStatus(2);
-    pensiunCount = DatabaseHelper().getCountByStatus(3);
-    meninggalCount = DatabaseHelper().getCountByStatus(4);
-    statusCounts = DatabaseHelper().getStatusCounts(); // Fetch status counts
-  }
+void initState() {
+  super.initState();
+  aktifCount = DatabaseHelper.instance.getCountByStatus(1);
+  keluarCount = DatabaseHelper.instance.getCountByStatus(2);
+  pensiunCount = DatabaseHelper.instance.getCountByStatus(3);
+  meninggalCount = DatabaseHelper.instance.getCountByStatus(4);
+  statusCounts = DatabaseHelper.instance.getStatusCounts();
+}
+
 
   @override
   Widget build(BuildContext context) {

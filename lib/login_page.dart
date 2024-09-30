@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import the shared_preferences package
 import 'database_helper.dart';
-import 'home_page.dart';  // <-- Ensure this import is present
+import 'home_page.dart';  // Ensure this import is present
 
 class LoginPage extends StatefulWidget {
   @override
@@ -8,18 +9,47 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _idPegawaiController = TextEditingController();  // <-- Changed controller name
+  final TextEditingController _idPegawaiController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();  // Check if the user is already logged in
+  }
+
+  void _checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? idPegawai = prefs.getString('idPegawai');
+    String? password = prefs.getString('password');
+
+    if (idPegawai != null && password != null) {
+      // Automatically log in the user if credentials are found
+      bool success = await DatabaseHelper.instance.login(idPegawai, password);
+      if (success) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage(idPegawai: idPegawai)),
+        );
+      }
+    }
+  }
+
   void _login() async {
-    String idPegawai = _idPegawaiController.text;  // <-- Changed field to id_pegawai
+    String idPegawai = _idPegawaiController.text;
     String password = _passwordController.text;
 
-    bool success = await DatabaseHelper().login(idPegawai, password);  // <-- Pass id_pegawai instead of nip
+    // Use the singleton instance of DatabaseHelper
+    bool success = await DatabaseHelper.instance.login(idPegawai, password);
     if (success) {
+      // Save the login info
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('idPegawai', idPegawai);
+      await prefs.setString('password', password);
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage(idPegawai: idPegawai)),  // Pass idPegawai here
+        MaterialPageRoute(builder: (context) => HomePage(idPegawai: idPegawai)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -38,8 +68,8 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _idPegawaiController,  // <-- Changed input field to id_pegawai
-              decoration: InputDecoration(labelText: 'ID Pegawai'),  // <-- Updated label
+              controller: _idPegawaiController,
+              decoration: InputDecoration(labelText: 'ID Pegawai'),
             ),
             TextField(
               controller: _passwordController,
