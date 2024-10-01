@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'app_bar_widget.dart';
 import 'drawer_widget.dart';
 import 'database_helper.dart';
+import 'dart:io';
 import 'dart:convert';
+import 'package:permission_handler/permission_handler.dart';
 
 
 class CareerPage extends StatelessWidget {
@@ -74,8 +76,7 @@ class CareerPage extends StatelessWidget {
     return unitKerja.replaceAll(RegExp(r'^\d+-|TRIAL-', caseSensitive: false), '').trim();
   }
 
-  // Function to return a widget for the file cell
-  Widget getFileCell(String base64String) {
+ Widget getFileCell(String base64String) {
   if (base64String.isEmpty) {
     return Text('No file');
   }
@@ -84,21 +85,69 @@ class CareerPage extends StatelessWidget {
     // Decode the base64 string
     final bytes = base64Decode(base64String);
     
-    return GestureDetector(
-      onTap: () => _showFullScreenImage(base64String), // Show full screen image on tap
-      child: Image.memory(
-        bytes, // Use Image.memory to display the image
-        width: 50, // Set your desired width
-        height: 50, // Set your desired height
-        fit: BoxFit.cover, // Fit the image in the box
-      ),
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () => _showFullScreenImage(base64String), // Show full screen image on tap
+          child: Image.memory(
+            bytes, // Use Image.memory to display the image
+            width: 50, // Set your desired width
+            height: 50, // Set your desired height
+            fit: BoxFit.cover, // Fit the image in the box
+          ),
+        ),
+        IconButton(
+          icon: Icon(Icons.download),
+          onPressed: () async {
+            await _downloadFile(base64String);
+          },
+        ),
+      ],
     );
   } catch (e) {
     return Text('Error loading image'); // Display error if decoding fails
   }
 }
 
-  // Function to show the full screen image
+
+Future<void> _downloadFile(String base64String) async {
+  try {
+    // Request storage permission
+    var status = await Permission.storage.request();
+    if (!status.isGranted) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Storage permission denied')),
+      );
+      return;
+    }
+
+    // Decode the base64 string to bytes
+    final bytes = base64Decode(base64String);
+    
+    // Define the path to the Downloads folder
+    String downloadsPath = '/storage/emulated/0/Pictures';
+    
+    // Generate a unique file name using the current timestamp
+    String fileName = 'downloaded_image_${DateTime.now().millisecondsSinceEpoch}.png';
+    String filePath = '$downloadsPath/$fileName';
+
+    // Write the file
+    File file = File(filePath);
+    await file.writeAsBytes(bytes);
+    
+    // Show a snackbar or dialog to confirm the download
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      SnackBar(content: Text('File downloaded to: $filePath')),
+    );
+  } catch (e) {
+    // Handle errors if the download fails
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      SnackBar(content: Text('Error downloading file: $e')),
+    );
+  }
+}
+
+
   // Function to show the full screen image
 void _showFullScreenImage(String base64String) {
   showDialog(
