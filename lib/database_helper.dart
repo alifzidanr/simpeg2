@@ -156,6 +156,50 @@ Future<List<Map<String, dynamic>>> getFamilyData(String idPegawai) async {
   return result;
 }
 
+Future<List<Map<String, dynamic>>> getCareerData(String idPegawai) async {
+  final db = await database;
+  final result = await db.rawQuery('''
+    SELECT 
+      pj.file_jabatan,
+      pj.no_sk,
+      pj.hal,
+      pj.tgl_sk,
+      pj.tgl_berlaku,
+      pj.tgl_sd,
+      rj.nama_jabatan AS jabatan,
+      ru.nama_unit AS unit_kerja,
+      pj.status_aktif
+    FROM t_pegawai_jabatan AS pj
+    JOIN t_ref_jabatan_pegawai AS rj ON pj.id_ref_jabatan_pegawai = rj.id_ref_jabatan_pegawai
+    JOIN t_ref_unit_kerja AS ru ON pj.id_unit_kerja = ru.id_unit_kerja
+    WHERE pj.id_pegawai = ?
+  ''', [idPegawai]);
+
+  return result;
+}
+
+Future<List<Map<String, dynamic>>> getGolonganData(String idPegawai) async {
+  final db = await database;
+  final result = await db.rawQuery('''
+    SELECT
+      pg.file_golongan,
+      pg.no_sk,
+      pg.hal,
+      pg.tgl_sk,
+      pg.tgl_berlaku,
+      pg.tgl_habis,
+      rg.golongan,         -- This will show the name of golongan
+      rg.pangkat,          -- This will show the name of pangkat
+      pg.status_aktif
+    FROM t_pegawai_golongan AS pg
+    JOIN t_ref_golongan AS rg ON pg.id_golongan = rg.id_ref_golongan  -- Ensure you're joining on the correct columns
+    WHERE pg.id_pegawai = ?
+''', [idPegawai]);
+
+  return result;
+}
+
+
   // Updated login function to use id_pegawai instead of nip
   Future<bool> login(String idPegawai, String password) async {
     final db = await database;
