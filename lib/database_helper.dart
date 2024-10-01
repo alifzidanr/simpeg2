@@ -133,6 +133,28 @@ Future<List<Map<String, dynamic>>> getFamilyData(String idPegawai) async {
     );
   }
 
+  Future<List<Map<String, dynamic>>> getEducationData(String idPegawai) async {
+  final db = await database;
+ final result = await db.rawQuery('''
+    SELECT 
+      rj.kode_jenjang AS Jenjang, 
+      pp.gelar AS Gelar,
+      pp.nama_prodi AS Prodi,
+      pp.nama_lembaga AS Institusi,
+      pp.kota_universitas AS Kota,
+      rnegara.nama_negara AS Negara,
+      pp.tgl_ijazah AS Tanggal_Ijazah,
+      pp.akreditasi_prodi AS Akreditasi
+    FROM t_pegawai_pendidikan AS pp
+    JOIN t_ref_jenjang_pendidikan AS rj ON pp.id_jenjang = rj.id_jenjang_pendidikan
+    JOIN t_ref_negara AS rnegara ON pp.negara = rnegara.id_negara
+    WHERE pp.id_pegawai = ?
+''', [idPegawai]);
+
+  print('Fetched education data: $result');
+
+  return result;
+}
 
   // Updated login function to use id_pegawai instead of nip
   Future<bool> login(String idPegawai, String password) async {

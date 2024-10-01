@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_bar_widget.dart';
 import 'drawer_widget.dart';
 import 'database_helper.dart';
-import 'package:data_table_2/data_table_2.dart';
-import 'package:intl/intl.dart'; // Import the intl package
+import 'package:intl/intl.dart';
 
 class FamilyPage extends StatelessWidget {
   final String idPegawai;
