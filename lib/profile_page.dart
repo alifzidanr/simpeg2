@@ -42,15 +42,17 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 }
 
-
-  Future<void> _showImageOptions() async {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Profile Photo'),
-          content: Text('What would you like to do?'),
-          actions: [
+Future<void> _showImageOptions() async {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -60,21 +62,26 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             TextButton(
               onPressed: () {
-                // Implement the delete photo logic here
                 _deletePhoto();
                 Navigator.of(context).pop();
               },
-              child: Text('Delete Photo'),
+              child: Text(
+                'Delete Photo',
+                style: TextStyle(color: Colors.red), // Set text color to red
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text('Cancel'),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
+
   
   Future<void> _requestFilePermission() async {
     final status = await Permission.storage.request();
