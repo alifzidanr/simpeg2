@@ -14,61 +14,85 @@ class CareerPage extends StatelessWidget {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Riwayat Jabatan'),
-      drawer: buildDrawer(context, idPegawai), 
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DatabaseHelper.instance.getCareerData(idPegawai), // Fetch your career data
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No data available.'));
-          }
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    key: _scaffoldKey,
+    appBar: buildAppBar(_scaffoldKey, 'Riwayat Jabatan'),
+    drawer: buildDrawer(context, idPegawai),
+    body: FutureBuilder<List<Map<String, dynamic>>>(
+      future: DatabaseHelper.instance.getCareerData(idPegawai), // Fetch your career data
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No data available.'));
+        }
 
-          final careerData = snapshot.data!;
+        final careerData = snapshot.data!;
 
-          return SingleChildScrollView(
-          scrollDirection: Axis.horizontal, // Enable horizontal scrolling
-          child: DataTable(
-            dataRowHeight: 100, // Set the desired height for each row
-              columns: [
-                DataColumn(label: Text('File')),
-                DataColumn(label: Text('No. SK')),
-                DataColumn(label: Text('Perihal')),
-                DataColumn(label: Text('Tanggal SK')),
-                DataColumn(label: Text('Tanggal Berlaku')),
-                DataColumn(label: Text('Tanggal Berakhir')),
-                DataColumn(label: Text('Jabatan')),
-                DataColumn(label: Text('Unit Kerja')),
-                DataColumn(label: Text('Aktif')),
-              ],
-              rows: careerData.map<DataRow>((career) {
-                return DataRow(cells: [
-                  DataCell(
-                    getFileCell(career['file_jabatan'] ?? '') // Check file type and return appropriate widget
+        return Row(
+          children: [
+            // Fixed "No." column
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: 50, // Width for the fixed "No." header
+                    child: Center(child: Text('No.', style: TextStyle(fontWeight: FontWeight.bold))),
                   ),
-                  DataCell(Text(career['no_sk'] ?? '')),
-                  DataCell(Text(career['hal'] ?? '')),
-                  DataCell(Text(career['tgl_sk'] ?? '')),
-                  DataCell(Text(career['tgl_berlaku'] ?? '')),
-                  DataCell(Text(career['tgl_sd'] ?? '')), // Use tgl_sd here
-                  DataCell(Text(career['jabatan'] ?? '')),
-                  DataCell(Text(formatUnitKerja(career['unit_kerja'] ?? ''))), // Format unit kerja
-                  DataCell(Text(career['status_aktif'] ?? '')),
-                ]);
-              }).toList(),
+                  ...List.generate(careerData.length, (index) {
+                    return Container(
+                      width: 50, // Width for each row in the "No." column
+                      height: 100, // Match the row height of the main table
+                      child: Center(child: Text('${index + 1}')),
+                    );
+                  }),
+                ],
+              ),
             ),
-          );
-        },
-      ),
-    );
-  }
+            // Scrollable table for other columns
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                child: DataTable(
+                  dataRowHeight: 100, // Set the desired height for each row
+                  columns: [
+                    DataColumn(label: Text('File')),
+                    DataColumn(label: Text('No. SK')),
+                    DataColumn(label: Text('Perihal')),
+                    DataColumn(label: Text('Tanggal SK')),
+                    DataColumn(label: Text('Tanggal Berlaku')),
+                    DataColumn(label: Text('Tanggal Berakhir')),
+                    DataColumn(label: Text('Jabatan')),
+                    DataColumn(label: Text('Unit Kerja')),
+                    DataColumn(label: Text('Aktif')),
+                  ],
+                  rows: careerData.map<DataRow>((career) {
+                    return DataRow(cells: [
+                      DataCell(getFileCell(career['file_jabatan'] ?? '')),
+                      DataCell(Text(career['no_sk'] ?? '')),
+                      DataCell(Text(career['hal'] ?? '')),
+                      DataCell(Text(career['tgl_sk'] ?? '')),
+                      DataCell(Text(career['tgl_berlaku'] ?? '')),
+                      DataCell(Text(career['tgl_sd'] ?? '')),
+                      DataCell(Text(career['jabatan'] ?? '')),
+                      DataCell(Text(formatUnitKerja(career['unit_kerja'] ?? ''))),
+                      DataCell(Text(career['status_aktif'] ?? '')),
+                    ]);
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
 
   // Function to format unit kerja
   String formatUnitKerja(String unitKerja) {

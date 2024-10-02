@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'account_settings_page.dart';
 
 AppBar buildAppBar(GlobalKey<ScaffoldState> scaffoldKey, String title) {
   return AppBar(
@@ -20,7 +21,13 @@ AppBar buildAppBar(GlobalKey<ScaffoldState> scaffoldKey, String title) {
     actions: [
       IconButton(
         icon: Icon(Icons.account_circle, color: Colors.white),
-        onPressed: () {},
+        onPressed: () {
+          // Navigate to AccountSettingsPage
+          Navigator.push(
+            scaffoldKey.currentContext!,
+            MaterialPageRoute(builder: (context) => AccountSettingsPage()),
+          );
+        },
       ),
     ],
   );

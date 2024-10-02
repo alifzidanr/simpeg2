@@ -13,60 +13,84 @@ class ClassPage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Riwayat Golongan'),
-      drawer: buildDrawer(context, idPegawai),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DatabaseHelper.instance.getGolonganData(idPegawai), // Fetch your golongan data
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No data available.'));
-          }
+Widget build(BuildContext context) {
+  return Scaffold(
+    key: _scaffoldKey,
+    appBar: buildAppBar(_scaffoldKey, 'Riwayat Golongan'),
+    drawer: buildDrawer(context, idPegawai),
+    body: FutureBuilder<List<Map<String, dynamic>>>(
+      future: DatabaseHelper.instance.getGolonganData(idPegawai), // Fetch your golongan data
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(child: Text('No data available.'));
+        }
 
-          final golonganData = snapshot.data!;
+        final golonganData = snapshot.data!;
 
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              dataRowHeight: 100, // Set the desired height for each row
-              columns: const [
-                DataColumn(label: Text('File')),
-                DataColumn(label: Text('No. SK')),
-                DataColumn(label: Text('Perihal')),
-                DataColumn(label: Text('Tanggal SK')),
-                DataColumn(label: Text('Tanggal Berlaku')),
-                DataColumn(label: Text('Tanggal Habis')),
-                DataColumn(label: Text('Golongan')),
-                DataColumn(label: Text('Pangkat')),
-                DataColumn(label: Text('Aktif')),
-              ],
-              rows: golonganData.map<DataRow>((data) {
-                return DataRow(cells: [
-                  DataCell(
-                    getFileCell(data['file_golongan'] ?? '') // Add image display logic here
+        return Row(
+          children: [
+            // Fixed "No." column
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: 50, // Width for the fixed "No." header
+                    child: Center(child: Text('No.', style: TextStyle(fontWeight: FontWeight.bold))),
                   ),
-                  DataCell(Text(data['no_sk'] ?? 'N/A')),
-                  DataCell(Text(data['hal'] ?? 'N/A')),
-                  DataCell(Text(data['tgl_sk'] ?? 'N/A')),
-                  DataCell(Text(data['tgl_berlaku'] ?? 'N/A')),
-                  DataCell(Text(data['tgl_habis'] ?? 'N/A')),
-                  DataCell(Text(data['golongan'] ?? 'N/A')),
-                  DataCell(Text(data['pangkat'] ?? 'N/A')),
-                  DataCell(Text(data['status_aktif'] ?? 'N/A')),
-                ]);
-              }).toList(),
+                  ...List.generate(golonganData.length, (index) {
+                    return Container(
+                      width: 50, // Width for each row in the "No." column
+                      height: 100, // Match the row height of the main table
+                      child: Center(child: Text('${index + 1}')),
+                    );
+                  }),
+                ],
+              ),
             ),
-          );
-        },
-      ),
-    );
-  }
+            // Scrollable table for other columns
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                child: DataTable(
+                  dataRowHeight: 100, // Set the desired height for each row
+                  columns: const [
+                    DataColumn(label: Text('File')),
+                    DataColumn(label: Text('No. SK')),
+                    DataColumn(label: Text('Perihal')),
+                    DataColumn(label: Text('Tanggal SK')),
+                    DataColumn(label: Text('Tanggal Berlaku')),
+                    DataColumn(label: Text('Tanggal Habis')),
+                    DataColumn(label: Text('Golongan')),
+                    DataColumn(label: Text('Pangkat')),
+                    DataColumn(label: Text('Aktif')),
+                  ],
+                  rows: golonganData.map<DataRow>((data) {
+                    return DataRow(cells: [
+                      DataCell(getFileCell(data['file_golongan'] ?? '')), // Add image display logic here
+                      DataCell(Text(data['no_sk'] ?? 'N/A')),
+                      DataCell(Text(data['hal'] ?? 'N/A')),
+                      DataCell(Text(data['tgl_sk'] ?? 'N/A')),
+                      DataCell(Text(data['tgl_berlaku'] ?? 'N/A')),
+                      DataCell(Text(data['tgl_habis'] ?? 'N/A')),
+                      DataCell(Text(data['golongan'] ?? 'N/A')),
+                      DataCell(Text(data['pangkat'] ?? 'N/A')),
+                      DataCell(Text(data['status_aktif'] ?? 'N/A')),
+                    ]);
+                  }).toList(),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
 
  Widget getFileCell(String base64String) {
   if (base64String.isEmpty) {

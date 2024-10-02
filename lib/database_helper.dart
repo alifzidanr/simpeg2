@@ -199,6 +199,16 @@ Future<List<Map<String, dynamic>>> getGolonganData(String idPegawai) async {
   return result;
 }
 
+// Add this method for updating the password
+  Future<void> updatePassword(String idPegawai, String newPassword) async {
+    final db = await database;
+    await db.update(
+      't_pegawai',
+      {'password': newPassword},  
+      where: 'id_pegawai = ?',     
+      whereArgs: [idPegawai],      
+    );
+  }
 
   // Updated login function to use id_pegawai instead of nip
   Future<bool> login(String idPegawai, String password) async {
