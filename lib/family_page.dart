@@ -18,7 +18,7 @@ class FamilyPage extends StatelessWidget {
 Widget build(BuildContext context) {
   return Scaffold(
     key: _scaffoldKey,
-    appBar: buildAppBar(_scaffoldKey, 'Data Keluarga'),
+    appBar: buildAppBar(_scaffoldKey, 'Data Keluarga', idPegawai),
     drawer: buildDrawer(context, idPegawai),
     body: FutureBuilder<List<Map<String, dynamic>>>(
       future: _fetchFamilyData(),

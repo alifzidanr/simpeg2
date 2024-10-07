@@ -16,7 +16,7 @@ class ClassPage extends StatelessWidget {
 Widget build(BuildContext context) {
   return Scaffold(
     key: _scaffoldKey,
-    appBar: buildAppBar(_scaffoldKey, 'Riwayat Golongan'),
+    appBar: buildAppBar(_scaffoldKey, 'Riwayat Golongan', idPegawai),
     drawer: buildDrawer(context, idPegawai),
     body: FutureBuilder<List<Map<String, dynamic>>>(
       future: DatabaseHelper.instance.getGolonganData(idPegawai), // Fetch your golongan data

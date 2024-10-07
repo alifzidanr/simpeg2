@@ -150,7 +150,7 @@ void _deletePhoto() async {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai'),
+      appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai', widget.idPegawai),
       drawer: buildDrawer(context, widget.idPegawai),
       body: profileData == null
           ? Center(child: CircularProgressIndicator())

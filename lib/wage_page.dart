@@ -12,7 +12,7 @@ class WagePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Slip Gaji'),
+      appBar: buildAppBar(_scaffoldKey, 'Slip Gaji', idPegawai),
       drawer: buildDrawer(context, idPegawai),
       body: Center(child: Text('Slip Gaji Page')),
     );

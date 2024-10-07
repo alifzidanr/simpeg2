@@ -37,7 +37,7 @@ void initState() {
 Widget build(BuildContext context) {
   return Scaffold(
     key: _scaffoldKey,
-    appBar: buildAppBar(_scaffoldKey, 'Dashboard'),
+    appBar: buildAppBar(_scaffoldKey, 'Dashboard', widget.idPegawai),
     drawer: buildDrawer(context, widget.idPegawai),
     body: Padding(
       padding: const EdgeInsets.all(16.0),

@@ -1,167 +1,155 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
-import 'login_page.dart'; // Import the LoginPage to redirect after logout
-import 'database_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'database_helper.dart'; // Ensure this import is present
+import 'login_page.dart'; // Ensure this import is present
 
 class AccountSettingsPage extends StatefulWidget {
+  final String idPegawai;
+
+  AccountSettingsPage({required this.idPegawai});
+
   @override
   _AccountSettingsPageState createState() => _AccountSettingsPageState();
 }
 
 class _AccountSettingsPageState extends State<AccountSettingsPage> {
-  final _formKey = GlobalKey<FormState>();
-  String? currentPassword, newPassword, confirmPassword;
-  String namaLengkap = '', nip = '';
-  final String idPegawai = 'your_id'; // Set this accordingly
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _loadEmployeeData();
-  }
+  void _updatePassword() async {
+    String currentPassword = _currentPasswordController.text;
+    String newPassword = _newPasswordController.text;
+    String confirmPassword = _confirmPasswordController.text;
 
-  // Load employee data (nama_lengkap and nip)
-  Future<void> _loadEmployeeData() async {
-    final dbHelper = DatabaseHelper.instance;
-    final employee = await dbHelper.getEmployeeProfile(idPegawai);
-    if (employee != null) {
-      setState(() {
-        namaLengkap = employee['nama_lengkap'] ?? '';
-        nip = employee['nip'] ?? '';
-      });
-    }
-  }
-
-  // Handle password change logic
-  Future<void> _changePassword() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final dbHelper = DatabaseHelper.instance;
-
-    // Verify current password
-    final isValid = await dbHelper.login(idPegawai, currentPassword!);
-    if (!isValid) {
-      _showSnackbar('Current password is incorrect');
+    // Validate the password fields
+    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill all fields.')),
+      );
       return;
     }
 
-    // Check if new password matches confirmation
     if (newPassword != confirmPassword) {
-      _showSnackbar('New password and confirm password do not match');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('New password and confirmation do not match.')),
+      );
+      return;
+    }
+
+    // Check if the current password is correct
+    bool isCurrentPasswordValid = await DatabaseHelper.instance.login(widget.idPegawai, currentPassword);
+    if (!isCurrentPasswordValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Current password is incorrect.')),
+      );
       return;
     }
 
     // Update the password in the database
-    await dbHelper.updatePassword(idPegawai, newPassword!);  // No encryption needed
-
-    _showSnackbar('Password changed successfully');
-  }
-
-  void _showSnackbar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  // Logout function to clear saved credentials
-  Future<void> _logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();  // Clear all saved preferences (including login info)
+    await DatabaseHelper.instance.updatePassword(widget.idPegawai, newPassword);
     
-    // Navigate back to the login page
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
-      (Route<dynamic> route) => false,  // This will remove all routes and prevent back navigation
+    // Optionally, log out the user after password change
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('idPegawai');
+    await prefs.remove('password');
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Password changed successfully. Please log in again.')),
     );
+
+    Navigator.pop(context); // Go back to login page
   }
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      backgroundColor: Color(0xFF0053C5),
-      title: Text(
-        'Account Settings',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-        ),
-      ),
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-    ),
-    body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Nama Lengkap: $namaLengkap', style: TextStyle(fontSize: 18)),
-          SizedBox(height: 8),
-          Text('NIP: $nip', style: TextStyle(fontSize: 18)),
-          SizedBox(height: 24),
-          Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Current Password'),
-                  obscureText: true,
-                  onChanged: (value) {
-                    currentPassword = value;
-                  },
-                  validator: (value) {
-                    return value!.isEmpty ? 'Please enter your current password' : null;
-                  },
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'New Password'),
-                  obscureText: true,
-                  onChanged: (value) {
-                    newPassword = value;
-                  },
-                  validator: (value) {
-                    return value!.isEmpty ? 'Please enter a new password' : null;
-                  },
-                ),
-                SizedBox(height: 16),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Confirm Password'),
-                  obscureText: true,
-                  onChanged: (value) {
-                    confirmPassword = value;
-                  },
-                  validator: (value) {
-                    return value!.isEmpty ? 'Please confirm your password' : null;
-                  },
-                ),
-                SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _changePassword,
-                  child: Text('Confirm'),
-                ),
-              ],
-            ),
+  void _logout() async {
+  // Show confirmation dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Confirm Logout'),
+        content: Text('Are you sure you want to logout?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: Text('No'),
           ),
-          SizedBox(height: 24),
-          Center(
-            child: ElevatedButton(
-              onPressed: _logout, // Logout button calls _logout
-              child: Text('Logout'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // Red for the logout button
-              ),
-            ),
+          TextButton(
+            onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.remove('idPegawai');
+              await prefs.remove('password');
+
+              // Navigate back to the login page and remove all previous routes
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => LoginPage()),
+                (Route<dynamic> route) => false,
+              );
+            },
+            child: Text('Yes'),
           ),
         ],
-      ),
-    ),
+      );
+    },
   );
 }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Account Settings',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Color(0xFF0053C5),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context); // Navigate back to the previous page
+          },
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _currentPasswordController,
+              decoration: InputDecoration(labelText: 'Current Password'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _newPasswordController,
+              decoration: InputDecoration(labelText: 'New Password'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _confirmPasswordController,
+              decoration: InputDecoration(labelText: 'Confirm New Password'),
+              obscureText: true,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _updatePassword,
+              child: Text('Change Password'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _logout,
+              child: Text('Logout'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white), // Updated line
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

@@ -33,7 +33,7 @@ class _EducationPageState extends State<EducationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Riwayat Pendidikan'),
+      appBar: buildAppBar(_scaffoldKey, 'Riwayat Pendidikan', widget.idPegawai),
       drawer: buildDrawer(context, widget.idPegawai),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _educationData,
