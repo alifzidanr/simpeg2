@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import shared_preferences
+import 'login_page.dart'; // Import the LoginPage to redirect after logout
 import 'database_helper.dart';
 
 class AccountSettingsPage extends StatefulWidget {
@@ -59,83 +61,107 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF0053C5),
-        title: Text(
-          'Account Settings',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Nama Lengkap: $namaLengkap', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text('NIP: $nip', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 24),
-            Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Current Password'),
-                    obscureText: true,
-                    onChanged: (value) {
-                      currentPassword = value;
-                    },
-                    validator: (value) {
-                      return value!.isEmpty ? 'Please enter your current password' : null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'New Password'),
-                    obscureText: true,
-                    onChanged: (value) {
-                      newPassword = value;
-                    },
-                    validator: (value) {
-                      return value!.isEmpty ? 'Please enter a new password' : null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    onChanged: (value) {
-                      confirmPassword = value;
-                    },
-                    validator: (value) {
-                      return value!.isEmpty ? 'Please confirm your password' : null;
-                    },
-                  ),
-                  SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _changePassword,
-                    child: Text('Confirm'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+  // Logout function to clear saved credentials
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();  // Clear all saved preferences (including login info)
+    
+    // Navigate back to the login page
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (Route<dynamic> route) => false,  // This will remove all routes and prevent back navigation
     );
   }
+
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Color(0xFF0053C5),
+      title: Text(
+        'Account Settings',
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: Colors.white),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+    ),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Nama Lengkap: $namaLengkap', style: TextStyle(fontSize: 18)),
+          SizedBox(height: 8),
+          Text('NIP: $nip', style: TextStyle(fontSize: 18)),
+          SizedBox(height: 24),
+          Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Current Password'),
+                  obscureText: true,
+                  onChanged: (value) {
+                    currentPassword = value;
+                  },
+                  validator: (value) {
+                    return value!.isEmpty ? 'Please enter your current password' : null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'New Password'),
+                  obscureText: true,
+                  onChanged: (value) {
+                    newPassword = value;
+                  },
+                  validator: (value) {
+                    return value!.isEmpty ? 'Please enter a new password' : null;
+                  },
+                ),
+                SizedBox(height: 16),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Confirm Password'),
+                  obscureText: true,
+                  onChanged: (value) {
+                    confirmPassword = value;
+                  },
+                  validator: (value) {
+                    return value!.isEmpty ? 'Please confirm your password' : null;
+                  },
+                ),
+                SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _changePassword,
+                  child: Text('Confirm'),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24),
+          Center(
+            child: ElevatedButton(
+              onPressed: _logout, // Logout button calls _logout
+              child: Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Red for the logout button
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 }
