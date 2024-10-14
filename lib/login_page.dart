@@ -69,11 +69,18 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _idPegawaiController,
-              decoration: InputDecoration(labelText: 'ID Pegawai'),
+              decoration: InputDecoration(
+                labelText: 'ID Pegawai',
+                hintText:'Please input your ID',
+                border: OutlineInputBorder(), ),
             ),
+            SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                hintText:'Please input your Password',
+                border: OutlineInputBorder(),),
               obscureText: true,
             ),
             SizedBox(height: 20),

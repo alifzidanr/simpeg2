@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'database_helper.dart'; // Ensure this import is present
-import 'login_page.dart'; // Ensure this import is present
+import 'database_helper.dart';
+import 'login_page.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   final String idPegawai;
@@ -116,40 +116,58 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _currentPasswordController,
-              decoration: InputDecoration(labelText: 'Current Password'),
-              obscureText: true,
-            ),
-            TextField(
-              controller: _newPasswordController,
-              decoration: InputDecoration(labelText: 'New Password'),
-              obscureText: true,
-            ),
-            TextField(
-              controller: _confirmPasswordController,
-              decoration: InputDecoration(labelText: 'Confirm New Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _updatePassword,
-              child: Text('Change Password'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _logout,
-              child: Text('Logout'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white), // Updated line
-            ),
-          ],
+         body: Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      TextField(
+        controller: _currentPasswordController,
+        decoration: InputDecoration(
+          labelText: 'Current Password',
+          hintText: 'Enter your current password', 
+          border: OutlineInputBorder(), 
         ),
+        obscureText: true,
       ),
+      SizedBox(height: 16), // Add space between text fields
+      TextField(
+        controller: _newPasswordController,
+        decoration: InputDecoration(
+          labelText: 'New Password',
+          hintText: 'Enter your new password', 
+          border: OutlineInputBorder(), 
+        ),
+        obscureText: true,
+      ),
+      SizedBox(height: 16),
+      TextField(
+        controller: _confirmPasswordController,
+        decoration: InputDecoration(
+          labelText: 'Confirm New Password',
+          hintText: 'Re-enter your new password', // Add hint text
+          border: OutlineInputBorder(), // Outlined border
+        ),
+        obscureText: true,
+      ),
+      SizedBox(height: 20),
+      ElevatedButton(
+        onPressed: _updatePassword,
+        child: Text('Change Password'),
+      ),
+      SizedBox(height: 20),
+      ElevatedButton(
+        onPressed: _logout,
+        child: Text('Logout'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
+        ), // Updated line
+      ),
+    ],
+  ),
+),
+
     );
   }
 }
