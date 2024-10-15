@@ -4,6 +4,7 @@ import 'class_page.dart';
 import 'career_page.dart';
 import 'education_page.dart';
 import 'family_page.dart';
+import 'dp4k_page.dart';
 import 'wage_page.dart';
 import 'home_page.dart';
 
@@ -37,7 +38,7 @@ Drawer buildDrawer(BuildContext context, String idPegawai) {
           leading: Icon(Icons.person),
           title: Text('Profile Pegawai'),
           onTap: () {
-            Navigator.push( 
+            Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => ProfilePage(idPegawai: idPegawai), // Pass idPegawai here
@@ -82,6 +83,16 @@ Drawer buildDrawer(BuildContext context, String idPegawai) {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => FamilyPage(idPegawai: idPegawai)),
+            );
+          },
+        ),
+        ListTile(
+          leading: Icon(Icons.assignment),
+          title: Text('DP4K'),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => DP4KPage(idPegawai: idPegawai)),
             );
           },
         ),

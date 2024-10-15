@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'account_settings_page.dart';
 import 'database_helper.dart';
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 AppBar buildAppBar(GlobalKey<ScaffoldState> scaffoldKey, String title, String idPegawai) {
   return AppBar(
@@ -143,6 +142,7 @@ AppBar buildAppBar(GlobalKey<ScaffoldState> scaffoldKey, String title, String id
           }
         },
       ),
+      SizedBox(width: 16),
       IconButton(
         icon: Icon(Icons.account_circle, color: Colors.white),
         onPressed: () {
