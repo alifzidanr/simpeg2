@@ -131,16 +131,15 @@ class _DP4KPageState extends State<DP4KPage> {
   }
 
   int _calculateTotalScore() {
-  String monthYearKey = _formatMonthYear(_selectedDate);
-  Map<String, int>? scores = _monthlyScores[monthYearKey];
-  if (scores == null) return 0;
+    String monthYearKey = _formatMonthYear(_selectedDate);
+    Map<String, int>? scores = _monthlyScores[monthYearKey];
+    if (scores == null) return 0;
 
-  return scores.values.fold<int>(
-    0,
-    (int sum, int? item) => sum + (item ?? 0),
-  );
-}
-
+    return scores.values.fold<int>(
+      0,
+      (int sum, int? item) => sum + (item ?? 0),
+    );
+  }
 
   double _calculatePercentage() {
     return (_calculateTotalScore() / maxScore) * 100;
@@ -188,19 +187,19 @@ class _DP4KPageState extends State<DP4KPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Month-Year Picker
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Period: $monthYearDisplay',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            GestureDetector(
+              onTap: () => _pickMonthYear(context),
+              child: AbsorbPointer(
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Period',
+                    border: OutlineInputBorder(),
+                    suffixIcon: Icon(Icons.calendar_today),
                   ),
+                  controller: TextEditingController(text: monthYearDisplay),
+                  readOnly: true,
                 ),
-                IconButton(
-                  icon: Icon(Icons.calendar_today),
-                  onPressed: () => _pickMonthYear(context),
-                ),
-              ],
+              ),
             ),
             SizedBox(height: 16),
             Text(
@@ -316,57 +315,56 @@ class _DP4KPageState extends State<DP4KPage> {
     );
   }
 
- void _showRatingDialog(String aspek, int subIndex) {
-  String monthYearKey = _formatMonthYear(_selectedDate);
-  Map<String, int> currentScores = _monthlyScores[monthYearKey]!;
-  String subAspekName = aspekPenilaian[aspek]?[subIndex] ?? 'Sub Aspek ${subIndex + 1}';
+  void _showRatingDialog(String aspek, int subIndex) {
+    String monthYearKey = _formatMonthYear(_selectedDate);
+    Map<String, int> currentScores = _monthlyScores[monthYearKey]!;
+    String subAspekName = aspekPenilaian[aspek]?[subIndex] ?? 'Sub Aspek ${subIndex + 1}';
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      int currentValue = currentScores['$aspek-$subIndex'] ??
-          ([
-            'Komitmen Organisasi',
-            'Prestasi Kerja',
-            'Tanggung Jawab',
-            'Kerjasama'
-          ].contains(aspek)
-              ? 3
-              : 2);
+    showDialog(
+      context: context,
+      builder: (context) {
+        int currentValue = currentScores['$aspek-$subIndex'] ??
+            ([
+              'Komitmen Organisasi',
+              'Prestasi Kerja',
+              'Tanggung Jawab',
+              'Kerjasama'
+            ].contains(aspek)
+                ? 3
+                : 2);
 
-      return AlertDialog(
-        title: Text('Set Nilai for $aspek - $subAspekName'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(6, (index) {
-              return RadioListTile<int>(
-                title: Text('$index'),
-                value: index,
-                groupValue: currentValue,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      currentScores['$aspek-$subIndex'] = value;
-                    });
-                    Navigator.of(context).pop();
-                  }
-                },
-              );
-            }),
+        return AlertDialog(
+          title: Text('Set Nilai for $aspek - $subAspekName'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(6, (index) {
+                return RadioListTile<int>(
+                  title: Text('$index'),
+                  value: index,
+                  groupValue: currentValue,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        currentScores['$aspek-$subIndex'] = value;
+                      });
+                      Navigator.of(context).pop();
+                    }
+                  },
+                );
+              }),
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('Cancel'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
