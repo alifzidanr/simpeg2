@@ -72,6 +72,7 @@ flutter:
   assets:
     - assets/data.db
     - assets/Logo_YPIA.png
+    - assets/BG.jpg
 
 
   # To add assets to your application, add an assets section, like this:
