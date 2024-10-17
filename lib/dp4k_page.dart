@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'app_bar_widget.dart';
 import 'drawer_widget.dart';
+import 'package:intl/intl.dart'; // For date formatting
 
 class DP4KPage extends StatefulWidget {
   final String idPegawai;
@@ -14,9 +15,12 @@ class DP4KPage extends StatefulWidget {
 
 class _DP4KPageState extends State<DP4KPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final Map<String, int> _nilai = {};
-  final int maxScore = 235;
 
+  // Store scores for each month-year
+  final Map<String, Map<String, int>> _monthlyScores = {};
+
+  final int maxScore = 235;
+  DateTime _selectedDate = DateTime.now();
   int _selectedDropdownValue = 3; // Default value
 
   final Map<String, List<String>> aspekPenilaian = {
@@ -92,32 +96,88 @@ class _DP4KPageState extends State<DP4KPage> {
   }
 
   void _initializeDefaultValues() {
-    for (var aspekEntry in aspekPenilaian.entries) {
-      String aspek = aspekEntry.key;
-      List<String> subAspekList = aspekEntry.value;
-      int defaultValue = (['Komitmen Organisasi', 'Prestasi Kerja', 'Tanggung Jawab', 'Kerjasama'].contains(aspek)) ? 3 : 2;
-      for (int i = 0; i < subAspekList.length; i++) {
-        _nilai['$aspek-$i'] = defaultValue;
+    // Initialize default values for the current month-year
+    String monthYearKey = _formatMonthYear(_selectedDate);
+    if (!_monthlyScores.containsKey(monthYearKey)) {
+      _monthlyScores[monthYearKey] = {};
+      for (var aspekEntry in aspekPenilaian.entries) {
+        String aspek = aspekEntry.key;
+        List<String> subAspekList = aspekEntry.value;
+        int defaultValue = ([
+          'Komitmen Organisasi',
+          'Prestasi Kerja',
+          'Tanggung Jawab',
+          'Kerjasama'
+        ].contains(aspek))
+            ? 3
+            : 2;
+        for (int i = 0; i < subAspekList.length; i++) {
+          _monthlyScores[monthYearKey]!['$aspek-$i'] = defaultValue;
+        }
       }
     }
   }
 
+  // Function to format DateTime to 'YYYY-MM'
+  String _formatMonthYear(DateTime date) {
+    return DateFormat('yyyy-MM').format(date);
+  }
+
   void _setAllValues(int value) {
+    String monthYearKey = _formatMonthYear(_selectedDate);
     setState(() {
-      _nilai.updateAll((key, oldValue) => value);
+      _monthlyScores[monthYearKey]!.updateAll((key, oldValue) => value);
     });
   }
 
   int _calculateTotalScore() {
-    return _nilai.values.fold(0, (sum, item) => sum + item);
-  }
+  String monthYearKey = _formatMonthYear(_selectedDate);
+  Map<String, int>? scores = _monthlyScores[monthYearKey];
+  if (scores == null) return 0;
+
+  return scores.values.fold<int>(
+    0,
+    (int sum, int? item) => sum + (item ?? 0),
+  );
+}
+
 
   double _calculatePercentage() {
     return (_calculateTotalScore() / maxScore) * 100;
   }
 
+  Future<void> _pickMonthYear(BuildContext context) async {
+    DateTime initialDate = DateTime(_selectedDate.year, _selectedDate.month);
+    DateTime firstDate = DateTime(2000);
+    DateTime lastDate = DateTime(2100);
+
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      helpText: 'Select Month and Year',
+      fieldLabelText: 'Month/Year',
+      fieldHintText: 'Month/Year',
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light(), // Use light or dark theme based on your preference
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = DateTime(pickedDate.year, pickedDate.month);
+        _initializeDefaultValues();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    String monthYearDisplay = DateFormat('MMMM yyyy').format(_selectedDate);
     return Scaffold(
       key: _scaffoldKey,
       appBar: buildAppBar(_scaffoldKey, 'DP4K Form', widget.idPegawai),
@@ -127,6 +187,22 @@ class _DP4KPageState extends State<DP4KPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Month-Year Picker
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Period: $monthYearDisplay',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.calendar_today),
+                  onPressed: () => _pickMonthYear(context),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
             Text(
               'DP4K Evaluation for Employee: ${widget.idPegawai}',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -178,6 +254,9 @@ class _DP4KPageState extends State<DP4KPage> {
   }
 
   Widget _buildAccordion() {
+    String monthYearKey = _formatMonthYear(_selectedDate);
+    Map<String, int> currentScores = _monthlyScores[monthYearKey]!;
+
     return Column(
       children: aspekPenilaian.entries.map((entry) {
         String aspek = entry.key;
@@ -186,7 +265,7 @@ class _DP4KPageState extends State<DP4KPage> {
         List<Widget> subAspekWidgets = [];
         for (int i = 0; i < subAspekList.length; i++) {
           String subAspekName = subAspekList[i];
-          subAspekWidgets.add(_buildTableRow(aspek, subAspekName, i));
+          subAspekWidgets.add(_buildTableRow(aspek, subAspekName, i, currentScores));
         }
 
         return Card(
@@ -214,7 +293,7 @@ class _DP4KPageState extends State<DP4KPage> {
     );
   }
 
-  Widget _buildTableRow(String aspek, String subAspekName, int subIndex) {
+  Widget _buildTableRow(String aspek, String subAspekName, int subIndex, Map<String, int> currentScores) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -229,7 +308,7 @@ class _DP4KPageState extends State<DP4KPage> {
               onPressed: () {
                 _showRatingDialog(aspek, subIndex);
               },
-              child: Text('Nilai (${_nilai["$aspek-$subIndex"]})'),
+              child: Text('Nilai (${currentScores["$aspek-$subIndex"]})'),
             ),
           ),
         ],
@@ -237,31 +316,38 @@ class _DP4KPageState extends State<DP4KPage> {
     );
   }
 
-  void _showRatingDialog(String aspek, int subIndex) {
-    // Retrieve the subpoint name using the aspek and subIndex
-    String subAspekName = aspekPenilaian[aspek]?[subIndex] ?? 'Sub Aspek ${subIndex + 1}';
+ void _showRatingDialog(String aspek, int subIndex) {
+  String monthYearKey = _formatMonthYear(_selectedDate);
+  Map<String, int> currentScores = _monthlyScores[monthYearKey]!;
+  String subAspekName = aspekPenilaian[aspek]?[subIndex] ?? 'Sub Aspek ${subIndex + 1}';
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        int currentValue = _nilai['$aspek-$subIndex'] ??
-            (['Komitmen Organisasi', 'Prestasi Kerja', 'Tanggung Jawab', 'Kerjasama'].contains(aspek)
-                ? 3
-                : 2);
+  showDialog(
+    context: context,
+    builder: (context) {
+      int currentValue = currentScores['$aspek-$subIndex'] ??
+          ([
+            'Komitmen Organisasi',
+            'Prestasi Kerja',
+            'Tanggung Jawab',
+            'Kerjasama'
+          ].contains(aspek)
+              ? 3
+              : 2);
 
-        return AlertDialog(
-          title: Text('Set Nilai for $aspek - $subAspekName'),
-          content: Column(
+      return AlertDialog(
+        title: Text('Set Nilai for $aspek - $subAspekName'),
+        content: SingleChildScrollView(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             children: List.generate(6, (index) {
               return RadioListTile<int>(
-                title: Text('Nilai $index'),
+                title: Text('$index'),
                 value: index,
                 groupValue: currentValue,
                 onChanged: (value) {
                   if (value != null) {
                     setState(() {
-                      _nilai['$aspek-$subIndex'] = value;
+                      currentScores['$aspek-$subIndex'] = value;
                     });
                     Navigator.of(context).pop();
                   }
@@ -269,16 +355,18 @@ class _DP4KPageState extends State<DP4KPage> {
               );
             }),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 }
