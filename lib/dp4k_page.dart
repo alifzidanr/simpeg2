@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app_bar_widget.dart';
 import 'drawer_widget.dart';
 import 'package:intl/intl.dart'; // For date formatting
@@ -15,13 +16,10 @@ class DP4KPage extends StatefulWidget {
 
 class _DP4KPageState extends State<DP4KPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  // Store scores for each month-year
   final Map<String, Map<String, int>> _monthlyScores = {};
-
   final int maxScore = 235;
   DateTime _selectedDate = DateTime.now();
-  int _selectedDropdownValue = 3; // Default value
+  int _selectedDropdownValue = 0; // Default value set to 0
 
   final Map<String, List<String>> aspekPenilaian = {
     'Komitmen Organisasi': [
@@ -93,10 +91,10 @@ class _DP4KPageState extends State<DP4KPage> {
   void initState() {
     super.initState();
     _initializeDefaultValues();
+    _loadScores(); // Load the scores when the page is first opened
   }
 
   void _initializeDefaultValues() {
-    // Initialize default values for the current month-year
     String monthYearKey = _formatMonthYear(_selectedDate);
     if (!_monthlyScores.containsKey(monthYearKey)) {
       _monthlyScores[monthYearKey] = {};
@@ -118,7 +116,44 @@ class _DP4KPageState extends State<DP4KPage> {
     }
   }
 
-  // Function to format DateTime to 'YYYY-MM'
+  Future<void> _saveScores() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String monthYearKey = _formatMonthYear(_selectedDate);
+
+    int totalScore = _calculateTotalScore();
+    double percentage = _calculatePercentage();
+
+    await prefs.setInt('${monthYearKey}_totalScore', totalScore);
+    await prefs.setDouble('${monthYearKey}_percentage', percentage);
+    // Save individual scores as well
+    _monthlyScores[monthYearKey]!.forEach((key, value) async {
+      await prefs.setInt('${monthYearKey}_$key', value);
+    });
+  }
+
+  Future<void> _loadScores() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String monthYearKey = _formatMonthYear(_selectedDate);
+
+    // Load individual scores
+    for (var aspekEntry in aspekPenilaian.entries) {
+      String aspek = aspekEntry.key;
+      List<String> subAspekList = aspekEntry.value;
+      for (int i = 0; i < subAspekList.length; i++) {
+        String key = '$aspek-$i';
+        int? score = prefs.getInt('${monthYearKey}_$key');
+        if (score != null) {
+          _monthlyScores[monthYearKey]![key] = score;
+        }
+      }
+    }
+
+    // Load total score and percentage
+    setState(() {
+      // This is needed to refresh the UI with the loaded scores
+    });
+  }
+
   String _formatMonthYear(DateTime date) {
     return DateFormat('yyyy-MM').format(date);
   }
@@ -128,6 +163,7 @@ class _DP4KPageState extends State<DP4KPage> {
     setState(() {
       _monthlyScores[monthYearKey]!.updateAll((key, oldValue) => value);
     });
+    _saveScores(); // Save the scores after setting all values
   }
 
   int _calculateTotalScore() {
@@ -160,7 +196,7 @@ class _DP4KPageState extends State<DP4KPage> {
       fieldHintText: 'Month/Year',
       builder: (context, child) {
         return Theme(
-          data: ThemeData.light(), // Use light or dark theme based on your preference
+          data: ThemeData.light(),
           child: child!,
         );
       },
@@ -169,7 +205,9 @@ class _DP4KPageState extends State<DP4KPage> {
     if (pickedDate != null) {
       setState(() {
         _selectedDate = DateTime(pickedDate.year, pickedDate.month);
+        _selectedDropdownValue = 0; // Reset the dropdown to 0
         _initializeDefaultValues();
+        _loadScores(); // Load scores for the newly selected month
       });
     }
   }
@@ -186,7 +224,6 @@ class _DP4KPageState extends State<DP4KPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Month-Year Picker
             GestureDetector(
               onTap: () => _pickMonthYear(context),
               child: AbsorbPointer(
@@ -207,7 +244,6 @@ class _DP4KPageState extends State<DP4KPage> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            // Dropdown Button to Set All Values
             Row(
               children: [
                 Text(
@@ -349,6 +385,7 @@ class _DP4KPageState extends State<DP4KPage> {
                         currentScores['$aspek-$subIndex'] = value;
                       });
                       Navigator.of(context).pop();
+                      _saveScores(); // Save scores after modifying individual aspects
                     }
                   },
                 );

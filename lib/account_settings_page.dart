@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:icons_plus/icons_plus.dart'; // Import the icons_plus package
+import 'terms_and_conditions_modal.dart'; // Import the modal file
 import 'database_helper.dart';
 import 'login_page.dart';
 
@@ -22,7 +24,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     String newPassword = _newPasswordController.text;
     String confirmPassword = _confirmPasswordController.text;
 
-    // Validate the password fields
     if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill all fields.')),
@@ -37,7 +38,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       return;
     }
 
-    // Check if the current password is correct
     bool isCurrentPasswordValid = await DatabaseHelper.instance.login(widget.idPegawai, currentPassword);
     if (!isCurrentPasswordValid) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,10 +46,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       return;
     }
 
-    // Update the password in the database
     await DatabaseHelper.instance.updatePassword(widget.idPegawai, newPassword);
 
-    // Optionally, log out the user after password change
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('idPegawai');
     await prefs.remove('password');
@@ -58,11 +56,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       SnackBar(content: Text('Password changed successfully. Please log in again.')),
     );
 
-    Navigator.pop(context); // Go back to login page
+    Navigator.pop(context);
   }
 
   void _logout() async {
-    // Show confirmation dialog
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -72,7 +69,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop(); 
               },
               child: Text('No'),
             ),
@@ -82,7 +79,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 await prefs.remove('idPegawai');
                 await prefs.remove('password');
 
-                // Navigate back to the login page and remove all previous routes
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) => LoginPage()),
                   (Route<dynamic> route) => false,
@@ -96,9 +92,23 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     );
   }
 
+  void _showTermsAndConditionsModal() {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true, // Allows modal to take full height if needed
+    backgroundColor: Colors.white, // Sets background color
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(20), // Rounded corners at the top
+      ),
+    ),
+    builder: (context) => TermsAndConditionsModal(), // Content of the modal
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
-    // Calculate available height by subtracting AppBar and status bar heights
     final double availableHeight = MediaQuery.of(context).size.height -
         kToolbarHeight -
         MediaQuery.of(context).padding.top;
@@ -117,7 +127,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context); // Navigate back to the previous page
+            Navigator.pop(context);
           },
         ),
       ),
@@ -129,8 +139,34 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           ),
           child: IntrinsicHeight(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        children: [
+                          Icon(Bootstrap.shield_check, size: 40),
+                          SizedBox(height: 8),
+                          Text('Privacy Policy'),
+                        ],
+                      ),
+                     GestureDetector(
+  onTap: _showTermsAndConditionsModal, // Show modal on tap
+  child: Column(
+    children: [
+      Icon(FontAwesome.file, size: 40),
+      SizedBox(height: 8),
+      Text('Terms & Conditions'),
+    ],
+  ),
+),
+
+                    ],
+                  ),
+                ),
+                SizedBox(height: 50), // 100px space between icons and components below
                 TextField(
                   controller: _currentPasswordController,
                   decoration: InputDecoration(
@@ -140,7 +176,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   ),
                   obscureText: true,
                 ),
-                SizedBox(height: 16), // Add space between text fields
+                SizedBox(height: 16),
                 TextField(
                   controller: _newPasswordController,
                   decoration: InputDecoration(
@@ -161,7 +197,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   obscureText: true,
                 ),
                 SizedBox(height: 20),
-                // Wrap the button in a Row to align it to the right
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -171,7 +206,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 250), // Increased spacing between buttons
+                SizedBox(height: 250),
                 ElevatedButton(
                   onPressed: _logout,
                   child: Text('Logout'),
