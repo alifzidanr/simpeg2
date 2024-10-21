@@ -4,6 +4,7 @@ import 'package:icons_plus/icons_plus.dart'; // Import the icons_plus package
 import 'terms_and_conditions_modal.dart'; // Import the modal file
 import 'database_helper.dart';
 import 'login_page.dart';
+import 'privacy_policy_modal.dart'; // Import the new privacy policy modal file
 
 class AccountSettingsPage extends StatefulWidget {
   final String idPegawai;
@@ -93,19 +94,32 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   void _showTermsAndConditionsModal() {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true, // Allows modal to take full height if needed
-    backgroundColor: Colors.white, // Sets background color
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(20), // Rounded corners at the top
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows modal to take full height if needed
+      backgroundColor: Colors.white, // Sets background color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20), // Rounded corners at the top
+        ),
       ),
-    ),
-    builder: (context) => TermsAndConditionsModal(), // Content of the modal
-  );
-}
+      builder: (context) => TermsAndConditionsModal(), // Content of the modal
+    );
+  }
 
+  void _showPrivacyPolicyModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows modal to take full height if needed
+      backgroundColor: Colors.white, // Sets background color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20), // Rounded corners at the top
+        ),
+      ),
+      builder: (context) => PrivacyPolicyModal(), // Content of the modal
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,24 +159,26 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
-                        children: [
-                          Icon(Bootstrap.shield_check, size: 40),
-                          SizedBox(height: 8),
-                          Text('Privacy Policy'),
-                        ],
+                      GestureDetector(
+                        onTap: _showPrivacyPolicyModal, // Show modal on tap
+                        child: Column(
+                          children: [
+                            Icon(Bootstrap.shield_check, size: 40),
+                            SizedBox(height: 8),
+                            Text('Privacy Policy'),
+                          ],
+                        ),
                       ),
-                     GestureDetector(
-  onTap: _showTermsAndConditionsModal, // Show modal on tap
-  child: Column(
-    children: [
-      Icon(FontAwesome.file, size: 40),
-      SizedBox(height: 8),
-      Text('Terms & Conditions'),
-    ],
-  ),
-),
-
+                      GestureDetector(
+                        onTap: _showTermsAndConditionsModal, // Show modal on tap
+                        child: Column(
+                          children: [
+                            Icon(FontAwesome.file, size: 40),
+                            SizedBox(height: 8),
+                            Text('Terms & Conditions'),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),

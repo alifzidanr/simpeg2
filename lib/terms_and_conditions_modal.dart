@@ -15,7 +15,7 @@ class TermsAndConditionsModal extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Terms and Conditions',
+                'Syarat dan Ketentuan',
                 style: GoogleFonts.roboto(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -29,7 +29,7 @@ class TermsAndConditionsModal extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 10),
 
           // Terms and Conditions content in a limited-height container
           Container(
@@ -63,7 +63,7 @@ class TermsAndConditionsModal extends StatelessWidget {
                   _buildSectionTitle('2. Pemberian Layanan Oleh Sistem Informasi Kepegawaian Al Azhar'),
                   _buildSectionContent(
                     '''Sistem Informasi Kepegawaian Al Azhar dengan ini menjamin kerahasiaan untuk menjaga informasi yang telah anda berikan, kecuali apa yang akan akan digunakan dalam Layanan Sistem Informasi Kepegawaian Al Azhar.''',),
- _buildSectionContent('''Akses Anda terhadap Layanan Sistem Informasi Kepegawaian Al Azhar tidak selalu tersedia sewaktu-waktu, karena terhadap Layanan dapat dilakukan perbaikan, perawatan, penambahan konten baru, fasilitas atau layanan lainnya. Sistem Informasi Kepegawaian Al Azhar akan memberikan pemberitahuan apabila sewaktu-waktu terjadi pembatasan akses..''',),
+ _buildSectionContent('''Akses Anda terhadap Layanan Sistem Informasi Kepegawaian Al Azhar tidak selalu tersedia sewaktu-waktu, karena terhadap Layanan dapat dilakukan perbaikan, perawatan, penambahan konten baru, fasilitas atau layanan lainnya. Sistem Informasi Kepegawaian Al Azhar akan memberikan pemberitahuan apabila sewaktu-waktu terjadi pembatasan akses.''',),
  _buildSectionContent('''Sistem Informasi Kepegawaian Al Azhar tidak dapat menjamin bahwa layanan akan bebas dari gangguan, kerusakan atau memiliki masalah server, bebas dari virus dan masalah lainnya. Apabila terjadi gangguan dalam Layanan Sistem Informasi Kepegawaian Al Azhar, Anda harus memberi tahu kepada kami agar dapat dilakukan perbaikan secepat mungkin.''',
                   ),
 
@@ -123,7 +123,7 @@ Khusus untuk pemberian Layanan Services, akan didasarkan pada perjanjian terpisa
             ),
           ),
 
-          SizedBox(height: 16), // Space between the content and the button
+          SizedBox(height: 8), // Space between the content and the button
 
           Align(
   alignment: Alignment.center, // Center the button
@@ -159,7 +159,7 @@ Khusus untuk pemberian Layanan Services, akan didasarkan pada perjanjian terpisa
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      padding: const EdgeInsets.only(top: 10.0, bottom: 5.0),
       child: Text(
         title,
         style: GoogleFonts.roboto(
@@ -172,7 +172,7 @@ Khusus untuk pemberian Layanan Services, akan didasarkan pada perjanjian terpisa
 
   Widget _buildSectionContent(String content) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0), // Add space after each paragraph
+      padding: const EdgeInsets.only(bottom: 8.0), // Add space after each paragraph
       child: Text(
         content,
         style: GoogleFonts.roboto(
@@ -186,7 +186,7 @@ Khusus untuk pemberian Layanan Services, akan didasarkan pada perjanjian terpisa
 
   Widget _buildListItem(String number, String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, bottom: 8.0), // Special indentation
+      padding: const EdgeInsets.only(left: 10.0, bottom: 8.0), // Special indentation
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -217,7 +217,7 @@ void _showTermsAndConditionsModal(BuildContext context) {
     isDismissible: true, // Allows tapping outside to close the modal
     enableDrag: true, // Allows dragging the modal down to close
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
     builder: (context) {
       return Padding(
