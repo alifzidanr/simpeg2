@@ -163,9 +163,15 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         onTap: _showPrivacyPolicyModal, // Show modal on tap
                         child: Column(
                           children: [
-                            Icon(Bootstrap.shield_check, size: 40),
+                            Icon(Bootstrap.shield_check, size: 35),
                             SizedBox(height: 8),
-                            Text('Privacy Policy'),
+                            Text(
+        'Privacy Policy',
+        style: TextStyle(
+          fontFamily: 'Roboto', // Roboto font
+          fontWeight: FontWeight.bold, // Bold font
+        ),
+      ),
                           ],
                         ),
                       ),
@@ -173,9 +179,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         onTap: _showTermsAndConditionsModal, // Show modal on tap
                         child: Column(
                           children: [
-                            Icon(FontAwesome.file, size: 40),
+                            Icon(FontAwesome.file, size: 35),
                             SizedBox(height: 8),
-                            Text('Terms & Conditions'),
+                          Text(
+        'Terms & Conditions',
+        style: TextStyle(
+          fontFamily: 'Roboto', // Roboto font
+          fontWeight: FontWeight.bold, // Bold font
+        ),)
                           ],
                         ),
                       ),
@@ -214,23 +225,46 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 ),
                 SizedBox(height: 20),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _updatePassword,
-                      child: Text('Change Password'),
-                    ),
-                  ],
-                ),
+  mainAxisAlignment: MainAxisAlignment.end,
+  children: [
+    ElevatedButton(
+      onPressed: _updatePassword,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green, // Green background
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10), // 10 Border radius
+        ),
+        foregroundColor: Colors.white, // White font color
+        textStyle: TextStyle(
+          fontFamily: 'Roboto', // Roboto font
+          fontWeight: FontWeight.bold, // Bold font
+        ),
+      ),
+      child: Text('Change Password'),
+    ),
+  ],
+),
+
                 SizedBox(height: 250),
-                ElevatedButton(
-                  onPressed: _logout,
-                  child: Text('Logout'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
+                SizedBox(
+  width: 200, // Adjust the width to make it twice as long (you can change the value as needed)
+  child: ElevatedButton(
+    onPressed: _logout,
+    child: Text('Logout'),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.red, // Red background
+      foregroundColor: Colors.white, // White font color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10), // Rectangle with 10 border radius
+      ),
+      textStyle: TextStyle(
+        fontFamily: 'Roboto', // Roboto font
+        fontWeight: FontWeight.bold, // Bold font
+      ),
+    ),
+  ),
+)
+
               ],
             ),
           ),

@@ -4,12 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 class TermsAndConditionsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
+    return FractionallySizedBox(
+      heightFactor: 0.8,  // Set the modal height to 80% of the screen
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
           // Close button and title
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -154,6 +156,7 @@ Khusus untuk pemberian Layanan Services, akan didasarkan pada perjanjian terpisa
 
         ],
       ),
+    )
     );
   }
 
