@@ -34,13 +34,12 @@ class TermsAndConditionsModal extends StatelessWidget {
           SizedBox(height: 10),
 
           // Terms and Conditions content in a limited-height container
-          Container(
-            height: MediaQuery.of(context).size.height * 0.6, // Limit height to 60% of the screen
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildSectionContent(
+          Expanded(
+  child: SingleChildScrollView(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionContent(
                     '''Peraturan mengenai Syarat dan Ketentuan dimana anda menggunakan layanan Aplikasi Sistem Informasi Kepegawaian Al Azhar. Jika Anda tidak setuju atas Syarat dan Ketentuan ini, silahkan tidak menggunakan layanan aplikasi ini.''',
                   ),
 
@@ -125,8 +124,6 @@ Khusus untuk pemberian Layanan Services, akan didasarkan pada perjanjian terpisa
             ),
           ),
 
-          SizedBox(height: 8), // Space between the content and the button
-
           Align(
   alignment: Alignment.center, // Center the button
   child: SizedBox(
@@ -147,7 +144,7 @@ Khusus untuk pemberian Layanan Services, akan didasarkan pada perjanjian terpisa
         style: GoogleFonts.roboto(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: Colors.white, // Text color
+          color: Colors.white,
         ),
       ),
     ),

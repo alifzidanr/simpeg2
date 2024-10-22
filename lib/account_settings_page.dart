@@ -19,6 +19,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  bool _isExpanded = false; // Control the expansion of the accordion
 
   void _updatePassword() async {
     String currentPassword = _currentPasswordController.text;
@@ -145,128 +146,157 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: availableHeight,
-          ),
-          child: IntrinsicHeight(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 20.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      GestureDetector(
-                        onTap: _showPrivacyPolicyModal, // Show modal on tap
-                        child: Column(
-                          children: [
-                            Icon(Bootstrap.shield_check, size: 35),
-                            SizedBox(height: 8),
-                            Text(
-        'Privacy Policy',
-        style: TextStyle(
-          fontFamily: 'Roboto', // Roboto font
-          fontWeight: FontWeight.bold, // Bold font
-        ),
-      ),
-                          ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Bootstrap.shield_check, size: 36), // Smaller icon size
+                      onTap: _showPrivacyPolicyModal,
+                      title: Text(
+                        'Privacy Policy',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16, // Slightly smaller font size
                         ),
                       ),
-                      GestureDetector(
-                        onTap: _showTermsAndConditionsModal, // Show modal on tap
-                        child: Column(
-                          children: [
-                            Icon(FontAwesome.file, size: 35),
-                            SizedBox(height: 8),
-                          Text(
-        'Terms & Conditions',
-        style: TextStyle(
-          fontFamily: 'Roboto', // Roboto font
-          fontWeight: FontWeight.bold, // Bold font
-        ),)
-                          ],
+                      subtitle: Text(
+                        'Learn more about how we handle your personal data in compliance with privacy laws.',
+                        style: TextStyle(fontSize: 14), // Smaller subtitle font
+                      ),
+                    ),
+                    Divider(), // Adds a divider between list items
+                    ListTile(
+                      leading: Icon(FontAwesome.file, size: 36), // Smaller icon size
+                      onTap: _showTermsAndConditionsModal,
+                      title: Text(
+                        'Terms & Conditions',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16, // Slightly smaller font size
                         ),
+                      ),
+                      subtitle: Text(
+                        'Read the rules and policies you agree to when using our services.',
+                        style: TextStyle(fontSize: 14), // Smaller subtitle font
+                      ),
+                    ),
+                    Divider(), // This divider separates Terms & Conditions from Change Password
+                  ],
+                ),
+              ),
+
+              // Custom Accordion for Change Password
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                  });
+                },
+                child: ListTile(
+                  leading: Icon(Icons.lock, size: 36),
+                  title: Text(
+                    "Change Password",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Update your account password to keep it secure.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  trailing: Icon(
+                    _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  ),
+                ),
+              ),
+              AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                height: _isExpanded ? null : 0,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _currentPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Current Password',
+                          hintText: 'Enter your current password',
+                          border: OutlineInputBorder(),
+                        ),
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 16),
+                      TextField(
+                        controller: _newPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'New Password',
+                          hintText: 'Enter your new password',
+                          border: OutlineInputBorder(),
+                        ),
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 16),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm New Password',
+                          hintText: 'Re-enter your new password',
+                          border: OutlineInputBorder(),
+                        ),
+                        obscureText: true,
+                      ),
+                      SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _updatePassword,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green, // Green background
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10), // 10 Border radius
+                              ),
+                              foregroundColor: Colors.white, // White font color
+                              textStyle: TextStyle(
+                                fontFamily: 'Roboto', // Roboto font
+                                fontWeight: FontWeight.bold, // Bold font
+                              ),
+                            ),
+                            child: Text('Change Password'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: 50), // 100px space between icons and components below
-                TextField(
-                  controller: _currentPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'Current Password',
-                    hintText: 'Enter your current password',
-                    border: OutlineInputBorder(),
+              ),
+              SizedBox(height: 250),
+              SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  onPressed: _logout,
+                  child: Text('Logout'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Red background
+                    foregroundColor: Colors.white, // White font color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // Rectangle with 10 border radius
+                    ),
+                    textStyle: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.bold, // Bold font
+                    ),
                   ),
-                  obscureText: true,
                 ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: _newPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'New Password',
-                    hintText: 'Enter your new password',
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: _confirmPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm New Password',
-                    hintText: 'Re-enter your new password',
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                ),
-                SizedBox(height: 20),
-                Row(
-  mainAxisAlignment: MainAxisAlignment.end,
-  children: [
-    ElevatedButton(
-      onPressed: _updatePassword,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.green, // Green background
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // 10 Border radius
-        ),
-        foregroundColor: Colors.white, // White font color
-        textStyle: TextStyle(
-          fontFamily: 'Roboto', // Roboto font
-          fontWeight: FontWeight.bold, // Bold font
-        ),
-      ),
-      child: Text('Change Password'),
-    ),
-  ],
-),
-
-                SizedBox(height: 250),
-                SizedBox(
-  width: 200, // Adjust the width to make it twice as long (you can change the value as needed)
-  child: ElevatedButton(
-    onPressed: _logout,
-    child: Text('Logout'),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.red, // Red background
-      foregroundColor: Colors.white, // White font color
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10), // Rectangle with 10 border radius
-      ),
-      textStyle: TextStyle(
-        fontFamily: 'Roboto', // Roboto font
-        fontWeight: FontWeight.bold, // Bold font
-      ),
-    ),
-  ),
-)
-
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

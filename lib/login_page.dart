@@ -84,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     'assets/Logo_YPIA.png',
                     height: 200.0, // Set the height to double the previous size
                   ),
-                  SizedBox(height: 30), // Space between logo and form
+                  SizedBox(height: 60), // Space between logo and form
                   // ID Pegawai Field
                   Container(
                     height: 50.0,

@@ -154,7 +154,7 @@ class PrivacyPolicyModal extends StatelessWidget {
                     style: GoogleFonts.roboto(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white, // Text color
+                      color: Colors.white,
                     ),
                   ),
                 ),
