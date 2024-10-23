@@ -37,43 +37,109 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _login() async {
-    try {
-      String nip = _nipController.text;
-      String password = _passwordController.text;
+ void _login() async {
+  try {
+    String nip = _nipController.text;
+    String password = _passwordController.text;
 
-      // Retrieve idPegawai using NIP
-      String? idPegawai = await DatabaseHelper.instance.getIdPegawaiByNip(nip);
+    // Check if NIP or Password is empty
+    if (nip.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Harap input NIP atau Password terlebih dahulu.',
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return; // Exit the function early if either field is empty
+    }
 
-      if (idPegawai != null) {
-        bool success = await DatabaseHelper.instance.login(idPegawai, password);
+    // Retrieve idPegawai using NIP
+    String? idPegawai = await DatabaseHelper.instance.getIdPegawaiByNip(nip);
 
-        if (success) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('nip', nip);
-          await prefs.setString('password', password);
+    if (idPegawai != null) {
+      bool success = await DatabaseHelper.instance.login(idPegawai, password);
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage(idPegawai: idPegawai)),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login failed. Incorrect NIP or password.')),
-          );
-        }
+      if (success) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('nip', nip);
+        await prefs.setString('password', password);
+
+        // Show success snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Login Berhasil.',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Navigate to HomePage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage(idPegawai: idPegawai)),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('NIP not found.')),
+          SnackBar(
+            content: Text(
+              'Password Salah.',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
-    } catch (e) {
-      print('Error during login: $e');
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred during login: $e')),
+        SnackBar(
+          content: Text(
+            'NIP tidak ditemukan.',
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
       );
     }
+  } catch (e) {
+    print('Error during login: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'An error occurred during login: $e',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {

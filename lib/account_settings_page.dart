@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:icons_plus/icons_plus.dart'; // Import the icons_plus package
-import 'terms_and_conditions_modal.dart'; // Import the modal file
+import 'package:icons_plus/icons_plus.dart'; 
+import 'terms_and_conditions_modal.dart'; 
 import 'database_helper.dart';
 import 'login_page.dart';
-import 'privacy_policy_modal.dart'; // Import the new privacy policy modal file
-import 'package:url_launcher/url_launcher.dart'; // For launching URLs
+import 'privacy_policy_modal.dart'; 
+import 'package:url_launcher/url_launcher.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   final String idPegawai;
@@ -20,8 +20,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  bool _isExpanded = false; // For Change Password accordion
-  bool _isContactExpanded = false; // For Contact Information accordion
+  bool _isExpanded = false;
+  bool _isContactExpanded = false; 
 
   void _updatePassword() async {
     String currentPassword = _currentPasswordController.text;
@@ -30,23 +30,53 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
     if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Harap isi semua kolom.')),
-      );
+  SnackBar(
+    content: Text(
+      'Harap isi semua kolom.',
+      style: TextStyle(
+        fontFamily: 'Roboto', // Using Roboto for the font
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    ),
+    backgroundColor: Colors.red, // Set background color to red
+  ),
+);
       return;
     }
 
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password baru dan konfirmasi tidak cocok.')),
-      );
+  SnackBar(
+    content: Text(
+      'Password baru dan konfirmasi tidak cocok.',
+      style: TextStyle(
+        fontFamily: 'Roboto', // Using Roboto for the font
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    ),
+    backgroundColor: Colors.red, // Set background color to red
+  ),
+);
       return;
     }
 
     bool isCurrentPasswordValid = await DatabaseHelper.instance.login(widget.idPegawai, currentPassword);
     if (!isCurrentPasswordValid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password saat ini salah.')),
-      );
+  SnackBar(
+    content: Text(
+      'Password saat ini salah.',
+      style: TextStyle(
+        fontFamily: 'Roboto', // Roboto with bold style
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    ),
+    backgroundColor: Colors.red, // Set background color to red
+  ),
+);
       return;
     }
 
@@ -56,9 +86,19 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     await prefs.remove('idPegawai');
     await prefs.remove('password');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password berhasil diubah.')),
-    );
+     ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Password berhasil diubah.',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
 
     Navigator.pop(context);
   }
@@ -76,17 +116,27 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     await launch(emailLaunchUri.toString());
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Tidak dapat membuka email app.')),
-    );
+  SnackBar(
+    content: Text(
+      'Tidak dapat membuka email app.',
+      style: TextStyle(
+        fontFamily: 'Roboto', // You don't need Google Fonts if you use Roboto in assets
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    ),
+    backgroundColor: Colors.red, // Set background color to red
+  ),
+);
   }
 }
 
-  void _logout() async {
+ void _logout() async {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: Colors.white, // White background for the dialog
+        backgroundColor: Colors.white,
         title: Text(
           'Konfirmasi Logout',
           style: TextStyle(
@@ -101,18 +151,18 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
             fontFamily: 'Roboto',
             fontWeight: FontWeight.bold,
             color: Colors.red,
-            fontSize: 18, // Red text for the message
+            fontSize: 18,
           ),
         ),
         actions: <Widget>[
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pop(); 
+              Navigator.of(context).pop();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red, // Red background
+              backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16), // Border radius 20
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
             child: Text(
@@ -120,7 +170,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               style: TextStyle(
                 fontFamily: 'Roboto',
                 fontWeight: FontWeight.bold,
-                color: Colors.white, // White font
+                color: Colors.white,
               ),
             ),
           ),
@@ -134,11 +184,26 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 MaterialPageRoute(builder: (context) => LoginPage()),
                 (Route<dynamic> route) => false,
               );
+
+              // Show success SnackBar
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Logout berhasil.',
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green, // Green background
+              backgroundColor: Colors.green,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16), // Border radius 20
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
             child: Text(
@@ -146,7 +211,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
               style: TextStyle(
                 fontFamily: 'Roboto',
                 fontWeight: FontWeight.bold,
-                color: Colors.white, // White font
+                color: Colors.white,
               ),
             ),
           ),
@@ -155,6 +220,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     },
   );
 }
+
 
 
   void _showTermsAndConditionsModal() {
