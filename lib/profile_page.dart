@@ -20,6 +20,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Map<String, dynamic>? profileData;
+  bool _isLoading = true; // Add this to track loading state
 
   @override
   void initState() {
@@ -28,16 +29,22 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _fetchProfileData() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
     try {
       print('Fetching profile for ID Pegawai: ${widget.idPegawai}');
       profileData = await DatabaseHelper.instance.getEmployeeProfile(widget.idPegawai);
       print('Profile data: $profileData');
-      setState(() {}); // Update the UI
     } catch (e) {
       print('Error fetching profile data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal mengambil data profil')),
       );
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading after data is fetched
+      });
     }
   }
 
@@ -135,22 +142,28 @@ class _ProfilePageState extends State<ProfilePage> {
     print('Foto dihapus.');
   }
 
- @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    key: _scaffoldKey,
-    appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai', widget.idPegawai),
-    drawer: buildDrawer(context, widget.idPegawai),
-    body: profileData == null
-        ? Center(child: Text('No profile data found.'))
-        : CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0), // Padding only for the content
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai', widget.idPegawai),
+      drawer: buildDrawer(context, widget.idPegawai),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF0053C5), // Loader with specified color
+              ),
+            )
+          : profileData == null
+              ? Center(child: Text('No profile data found.'))
+              : CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0), // Padding only for the content
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                       // Centering the profile image in the layout
                       Center(
                         child: Padding(

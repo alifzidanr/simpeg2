@@ -213,13 +213,40 @@ Future<List<Map<String, dynamic>>> getGolonganData(String idPegawai) async {
     );
   }
 
-  // Updated login function to use id_pegawai instead of nip
-  Future<bool> login(String idPegawai, String password) async {
+Future<String?> getIdPegawaiByNip(String nip) async {
+  final db = await database;
+  final result = await db.rawQuery(
+    'SELECT id_pegawai FROM t_pegawai WHERE nip = ?',
+    [nip],
+  );
+
+  if (result.isNotEmpty) {
+    // Cast id_pegawai to String (if it's stored as an int, convert to String)
+    return result.first['id_pegawai'].toString();
+  }
+
+  return null;
+}
+
+
+// Updated login function to use id_pegawai instead of nip
+Future<bool> login(String idPegawai, String password) async {
+  try {
     final db = await database;
+    print('Checking login for id_pegawai: $idPegawai with password: $password');
     final List<Map<String, dynamic>> results = await db.rawQuery(
       'SELECT * FROM t_pegawai WHERE id_pegawai = ? AND password = ?',
-      [idPegawai, password],
+      [int.tryParse(idPegawai) ?? idPegawai, password],  // Convert idPegawai to int if possible
     );
+
+    print('Query results: $results');
     return results.isNotEmpty;
+  } catch (e) {
+    print('Error in login query: $e');
+    return false;
   }
+}
+
+
+
 }

@@ -151,7 +151,7 @@ class _HomePageState extends State<HomePage> {
       future: statusCounts,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: Color(0xFF0053C5),));
         }
 
         List<int> counts = snapshot.data!;
@@ -228,7 +228,7 @@ class _HomePageState extends State<HomePage> {
       future: statusCounts,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: Color(0xFF0053C5),));
         }
 
         List<int> counts = snapshot.data!;

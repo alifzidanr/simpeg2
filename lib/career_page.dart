@@ -8,7 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 class CareerPage extends StatelessWidget {
   final String idPegawai; // Add idPegawai as a parameter
-  
+
   CareerPage({required this.idPegawai});
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -23,7 +23,7 @@ class CareerPage extends StatelessWidget {
         future: DatabaseHelper.instance.getCareerData(idPegawai), // Fetch your career data
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator(color: Color(0xFF0053C5),));
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -34,19 +34,31 @@ class CareerPage extends StatelessWidget {
 
           return Row(
             children: [
-              // Fixed "No." column
+              // Fixed "No." column with correct height adjustment
               SingleChildScrollView(
-                child: Column(
+                child: Table(
+                  columnWidths: const {0: FixedColumnWidth(50)}, // Fixed width for the "No." column
                   children: [
-                    Container(
-                      width: 50, // Width for the fixed "No." header
-                      child: Center(child: Text('No.', style: TextStyle(fontWeight: FontWeight.bold))),
+                    TableRow(
+                      children: [
+                        Container(
+                          height: 56, // Same height as the header row of DataTable
+                          child: Center(
+                            child: Text('No.', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ],
                     ),
                     ...List.generate(careerData.length, (index) {
-                      return Container(
-                        width: 50, // Width for each row in the "No." column
-                        height: 100, // Match the row height of the main table
-                        child: Center(child: Text('${index + 1}')),
+                      return TableRow(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).orientation == Orientation.landscape
+                                ? MediaQuery.of(context).size.height * 0.15
+                                : MediaQuery.of(context).size.height * 0.1, // Match the row height of DataTable
+                            child: Center(child: Text('${index + 1}')),
+                          ),
+                        ],
                       );
                     }),
                   ],
@@ -57,7 +69,9 @@ class CareerPage extends StatelessWidget {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal, // Enable horizontal scrolling
                   child: DataTable(
-                    dataRowHeight: 100, // Set the desired height for each row
+                    dataRowHeight: MediaQuery.of(context).orientation == Orientation.landscape
+                        ? MediaQuery.of(context).size.height * 0.15
+                        : MediaQuery.of(context).size.height * 0.1, // Match the row height of the "No." column
                     columns: [
                       DataColumn(label: Text('File')),
                       DataColumn(label: Text('No. SK')),
@@ -106,7 +120,7 @@ class CareerPage extends StatelessWidget {
     try {
       // Decode the base64 string
       final bytes = base64Decode(base64String);
-      
+
       return Row(
         children: [
           GestureDetector(
@@ -144,10 +158,10 @@ class CareerPage extends StatelessWidget {
 
       // Decode the base64 string to bytes
       final bytes = base64Decode(base64String);
-      
+
       // Define the path to the Downloads folder
       String downloadsPath = '/storage/emulated/0/Pictures';
-      
+
       // Generate a unique file name using the current timestamp
       String fileName = 'downloaded_image_${DateTime.now().millisecondsSinceEpoch}.png';
       String filePath = '$downloadsPath/$fileName';
@@ -155,7 +169,7 @@ class CareerPage extends StatelessWidget {
       // Write the file
       File file = File(filePath);
       await file.writeAsBytes(bytes);
-      
+
       // Show a snackbar or dialog to confirm the download
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(content: Text('File downloaded to: $filePath')),
@@ -175,7 +189,7 @@ class CareerPage extends StatelessWidget {
       builder: (context) {
         // Decode the base64 string for full-screen display
         final bytes = base64Decode(base64String);
-        
+
         return Dialog(
           child: Container(
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
