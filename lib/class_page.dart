@@ -26,7 +26,7 @@ Widget build(BuildContext context) {
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No data available.'));
+          return Center(child: Text('Tidak ada data yang tersedia.'));
         }
 
         final golonganData = snapshot.data!;

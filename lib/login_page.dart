@@ -58,34 +58,41 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Background Image
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/BG.jpg'),
-                fit: BoxFit.cover,
-              ),
+@override
+Widget build(BuildContext context) {
+  // Check if the device is in portrait mode
+  bool isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+
+  return Scaffold(
+    body: Stack(
+      children: [
+        // Background Image
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/BG.jpg'),
+              fit: BoxFit.cover,
             ),
           ),
-          // Login Form with Logo
-          Center(
+        ),
+        // Wrapping content with SingleChildScrollView
+        SingleChildScrollView(
+          child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.only(
+                top: isPortrait ? 150.0 : 30.0, // 200px padding in portrait, 50px in landscape
+                left: 16.0,
+                right: 16.0,
+                bottom: 30.0,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
                   Image.asset(
                     'assets/Logo_YPIA.png',
-                    height: 200.0, // Set the height to double the previous size
+                    height: 200.0, 
                   ),
-                  SizedBox(height: 60), // Space between logo and form
-                  // ID Pegawai Field
+                  SizedBox(height: 60),
                   Container(
                     height: 50.0,
                     decoration: BoxDecoration(
@@ -111,7 +118,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: 16),
-                  // Password Field
                   Container(
                     height: 50.0,
                     decoration: BoxDecoration(
@@ -138,14 +144,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  // Login Button
                   Container(
-                    width: double.infinity, // Match the width of the text fields
-                    height: 50.0, // Similar height to text fields for consistency
+                    width: double.infinity, 
+                    height: 48.0, 
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white, // Button color
-                        foregroundColor: Color(0xFF0053C5), // Text color
+                        backgroundColor: Colors.white, 
+                        foregroundColor: Color(0xFF0053C5), 
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0),
                         ),
@@ -163,8 +168,10 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 }

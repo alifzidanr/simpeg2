@@ -43,7 +43,7 @@ class _EducationPageState extends State<EducationPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No education data found.'));
+            return Center(child: Text('Tidak ada data yang tersedia.'));
           }
 
           final educationList = snapshot.data!;

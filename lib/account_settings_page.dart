@@ -30,14 +30,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
     if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill all fields.')),
+        SnackBar(content: Text('Harap isi semua kolom.')),
       );
       return;
     }
 
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('New password and confirmation do not match.')),
+        SnackBar(content: Text('Password baru dan konfirmasi tidak cocok.')),
       );
       return;
     }
@@ -45,7 +45,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     bool isCurrentPasswordValid = await DatabaseHelper.instance.login(widget.idPegawai, currentPassword);
     if (!isCurrentPasswordValid) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Current password is incorrect.')),
+        SnackBar(content: Text('Password saat ini salah.')),
       );
       return;
     }
@@ -57,44 +57,104 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     await prefs.remove('password');
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password changed successfully. Please log in again.')),
+      SnackBar(content: Text('Password berhasil diubah.')),
     );
 
     Navigator.pop(context);
   }
 
-  void _logout() async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Logout'),
-          content: Text('Are you sure you want to logout?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); 
-              },
-              child: Text('No'),
-            ),
-            TextButton(
-              onPressed: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.remove('idPegawai');
-                await prefs.remove('password');
+  void _launchEmail(String email) async {
+  final Uri emailLaunchUri = Uri(
+    scheme: 'mailto',
+    path: email,
+    queryParameters: {
+      'subject': 'Hello',
+    },
+  );
 
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                  (Route<dynamic> route) => false,
-                );
-              },
-              child: Text('Yes'),
-            ),
-          ],
-        );
-      },
+  if (await canLaunch(emailLaunchUri.toString())) {
+    await launch(emailLaunchUri.toString());
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Tidak dapat membuka email app.')),
     );
   }
+}
+
+  void _logout() async {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white, // White background for the dialog
+        title: Text(
+          'Konfirmasi Logout',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin keluar?',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+            fontSize: 18, // Red text for the message
+          ),
+        ),
+        actions: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); 
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red, // Red background
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16), // Border radius 20
+              ),
+            ),
+            child: Text(
+              'Tidak',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // White font
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.remove('idPegawai');
+              await prefs.remove('password');
+
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => LoginPage()),
+                (Route<dynamic> route) => false,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green, // Green background
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16), // Border radius 20
+              ),
+            ),
+            child: Text(
+              'Ya',
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // White font
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   void _showTermsAndConditionsModal() {
     showModalBottomSheet(
@@ -131,7 +191,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       await launch(url);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not open WhatsApp.')),
+        SnackBar(content: Text('Tidak dapat membuka WhatsApp.')),
       );
     }
   }
@@ -141,7 +201,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Account Settings',
+          'Pengaturan Akun',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -173,14 +233,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   child: ListTile(
                     leading: Icon(Icons.lock, size: 36),
                     title: Text(
-                      "Change Password",
+                      "Ubah Password",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
                     subtitle: Text(
-                      'Update your account password to keep it secure.',
+                      'Perbarui kata sandi akun Anda agar tetap aman.',
                       style: TextStyle(fontSize: 14),
                     ),
                     trailing: Icon(
@@ -197,39 +257,84 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                       children: [
                         SizedBox(height: 12),
                         TextField(
-                          controller: _currentPasswordController,
-                          decoration: InputDecoration(
-                            labelText: 'Current Password',
-                            hintText: 'Enter your current password',
-                            prefixIcon: Icon(Bootstrap.arrow_repeat), // Corresponding icon
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.only(left: 12, top: 12, bottom: 12),
+                            controller: _currentPasswordController,
+                            decoration: InputDecoration(
+                              labelText: 'Password saat ini',
+                              labelStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.bold, // Set the font to bold
+                                color: Color(0xFF0053C5),
+                              ),
+                              hintText: 'Masukkan password saat ini',
+                              hintStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.bold, // Set the font to bold
+                              ),
+                              prefixIcon: Icon(Bootstrap.arrow_repeat),
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.only(left: 12, top: 12, bottom: 12),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color(0xFF0053C5),
+                                  width: 2.0,
+                                ),
+                              ),
+                            ),
+                            obscureText: true,
                           ),
-                          obscureText: true,
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: _newPasswordController,
-                          decoration: InputDecoration(
-                            labelText: 'New Password',
-                            hintText: 'Enter your new password',
-                            prefixIcon: Icon(Bootstrap.check2), // Corresponding icon
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.only(left: 12, top: 12, bottom: 12),
+                          SizedBox(height: 12),
+                          TextField(
+                            controller: _newPasswordController,
+                            decoration: InputDecoration(
+                              labelText: 'Password baru',
+                              labelStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.bold, // Set the font to bold
+                                color: Color(0xFF0053C5),
+                              ),
+                              hintText: 'Masukkan password baru',
+                              hintStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.bold, // Set the font to bold
+                              ),
+                              prefixIcon: Icon(Bootstrap.check2),
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.only(left: 12, top: 12, bottom: 12),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color(0xFF0053C5),
+                                  width: 2.0,
+                                ),
+                              ),
+                            ),
+                            obscureText: true,
                           ),
-                          obscureText: true,
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            labelText: 'Confirm New Password',
-                            hintText: 'Re-enter your new password',
-                            prefixIcon: Icon(Bootstrap.check2_all), // Corresponding icon
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.only(left: 12, top: 12, bottom: 12),
-                          ),
-                          obscureText: true,
+                          SizedBox(height: 12),
+                          TextField(
+                            controller: _confirmPasswordController,
+                            decoration: InputDecoration(
+                              labelText: 'Konfirmasi password baru',
+                              labelStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.bold, // Set the font to bold
+                                color: Color(0xFF0053C5),
+                              ),
+                              hintText: 'Masukkan kembali password baru Anda',
+                              hintStyle: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontWeight: FontWeight.bold, // Set the font to bold
+                              ),
+                              prefixIcon: Icon(Bootstrap.check2_all),
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.only(left: 12, top: 12, bottom: 12),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color(0xFF0053C5),
+                                  width: 2.0,
+                                ),
+                              ),
+                            ),
+                            obscureText: true,
                         ),
                         SizedBox(height: 20),
                         Row(
@@ -248,7 +353,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                                   fontWeight: FontWeight.bold, // Bold font
                                 ),
                               ),
-                              child: Text('Change Password'),
+                              child: Text('Ubah Password'),
                             ),
                           ],
                         ),
@@ -263,14 +368,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   leading: Icon(Bootstrap.shield_check, size: 36),
                   onTap: _showPrivacyPolicyModal,
                   title: Text(
-                    'Privacy Policy',
+                    'Kebijakan Privasi',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
                   subtitle: Text(
-                    'Learn more about how we handle your personal data in compliance with privacy laws.',
+                    'Pelajari lebih lanjut tentang cara kami menangani data pribadi Anda sesuai dengan undang-undang privasi.',
                     style: TextStyle(fontSize: 14),
                   ),
                 ),
@@ -280,14 +385,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   leading: Icon(FontAwesome.file, size: 36),
                   onTap: _showTermsAndConditionsModal,
                   title: Text(
-                    'Terms & Conditions',
+                    'Syarat dan Ketentuan',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
                   ),
                   subtitle: Text(
-                    'Read the rules and policies you agree to when using our services.',
+                    'Baca peraturan dan kebijakan yang Anda setujui saat menggunakan layanan kami.',
                     style: TextStyle(fontSize: 14),
                   ),
                 ),
@@ -302,7 +407,7 @@ GestureDetector(
   child: ListTile(
     leading: Icon(Bootstrap.person_lines_fill, size: 36),
     title: Text(
-      "Contact Us",
+      "Hubungi Kami",
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 16,
@@ -310,7 +415,7 @@ GestureDetector(
       ),
     ),
     subtitle: Text(
-      'Reach out to us via email, telephone, or WhatsApp for assistance.',
+      'Hubungi kami melalui email, telepon, atau WhatsApp untuk mendapatkan bantuan.',
       style: TextStyle(fontSize: 14),
     ),
     trailing: Icon(
@@ -327,30 +432,34 @@ AnimatedContainer(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: Icon(Bootstrap.envelope, size: 24),
-          title: Text(
-            'Email',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              fontFamily: 'Roboto',
-            ),
-          ),
-          subtitle: Text(
-            'kesra@al-azhar.or.id',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              fontFamily: 'Roboto',
-            ),
-          ),
-          contentPadding: EdgeInsets.zero, // Remove extra padding inside ListTile
-        ),
+  leading: Icon(Bootstrap.envelope, size: 24),
+  title: Text(
+    'Email',
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 14,
+      fontFamily: 'Roboto',
+    ),
+  ),
+  subtitle: Text(
+    'kesra@al-azhar.or.id',
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 14,
+      fontFamily: 'Roboto',
+    ),
+  ),
+  contentPadding: EdgeInsets.zero,
+  trailing: Icon(Bootstrap.arrow_right), // Remove extra padding inside ListTile
+  onTap: () {
+    _launchEmail('kesra@al-azhar.or.id');
+  },
+),
         Divider(height: 1), // Reduce height of the divider
         ListTile(
           leading: Icon(Bootstrap.telephone_fill, size: 24),
           title: Text(
-            'Telephone',
+            'Telepon',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -408,7 +517,7 @@ Padding(
     contentPadding: EdgeInsets.zero, // Aligns the Logout item with the others
     leading: Icon(Bootstrap.box_arrow_right, size: 36, color: Colors.red),
     title: Text(
-      'Logout',
+      'Keluar',
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 16,
@@ -417,7 +526,7 @@ Padding(
       ),
     ),
     subtitle: Text(
-      'Sign out of your account securely.',
+      'Keluar dari akun Anda dengan aman.',
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 14,

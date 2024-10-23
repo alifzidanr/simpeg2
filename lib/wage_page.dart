@@ -14,7 +14,7 @@ class WagePage extends StatelessWidget {
       key: _scaffoldKey,
       appBar: buildAppBar(_scaffoldKey, 'Slip Gaji', idPegawai),
       drawer: buildDrawer(context, idPegawai),
-      body: Center(child: Text('Slip Gaji Page')),
+      body: Center(child: Text('Tidak ada data yang tersedia.')),
     );
   }
 }

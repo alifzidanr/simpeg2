@@ -63,24 +63,27 @@ class DatabaseHelper {
         sn.status_nikah,
         rg.nama_wilayah AS regional
       FROM t_pegawai AS p
-      JOIN t_pegawai_jabatan AS pj ON p.id_pegawai = pj.id_pegawai
-      JOIN t_ref_jabatan_pegawai AS rj ON pj.id_ref_jabatan_pegawai = rj.id_ref_jabatan_pegawai
-      JOIN t_ref_unit_kerja AS ru ON pj.id_unit_kerja = ru.id_unit_kerja
-      JOIN t_ref_status_pegawai AS rs ON pj.id_status_pegawai = rs.id_status_pegawai
-      JOIN t_ref_bidang_diampu AS bd ON p.id_bidang_diampu = bd.id_bidang_diampu
-      JOIN t_ref_status_nikah AS sn ON p.id_status_nikah = sn.id_status_nikah
-      JOIN t_ref_regional AS rg ON p.id_regional = rg.id_regional
+      LEFT JOIN t_pegawai_jabatan AS pj ON p.id_pegawai = pj.id_pegawai
+      LEFT JOIN t_ref_jabatan_pegawai AS rj ON pj.id_ref_jabatan_pegawai = rj.id_ref_jabatan_pegawai
+      LEFT JOIN t_ref_unit_kerja AS ru ON pj.id_unit_kerja = ru.id_unit_kerja
+      LEFT JOIN t_ref_status_pegawai AS rs ON pj.id_status_pegawai = rs.id_status_pegawai
+      LEFT JOIN t_ref_bidang_diampu AS bd ON p.id_bidang_diampu = bd.id_bidang_diampu
+      LEFT JOIN t_ref_status_nikah AS sn ON p.id_status_nikah = sn.id_status_nikah
+      LEFT JOIN t_ref_regional AS rg ON p.id_regional = rg.id_regional
       WHERE p.id_pegawai = ?
     ''', [idPegawai]);
 
     if (result.isNotEmpty) {
       return result.first;
+    } else {
+      print('No profile data found for id_pegawai: $idPegawai');
     }
   } catch (e) {
     print('Error fetching employee profile: $e');
   }
   return null;
 }
+
 
 Future<List<Map<String, dynamic>>> getFamilyData(String idPegawai) async {
   final db = await database;
