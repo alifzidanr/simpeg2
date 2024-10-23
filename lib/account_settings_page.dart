@@ -92,6 +92,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           style: TextStyle(
             fontFamily: 'Roboto',
             fontWeight: FontWeight.bold,
+            fontSize: 22,
           ),
         ),
         content: Text(

@@ -135,19 +135,19 @@ class _ProfilePageState extends State<ProfilePage> {
     print('Foto dihapus.');
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai', widget.idPegawai),
-      drawer: buildDrawer(context, widget.idPegawai),
-      body: profileData == null
-          ? Center(child: Text('No profile data found.'))
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    key: _scaffoldKey,
+    appBar: buildAppBar(_scaffoldKey, 'Profile Pegawai', widget.idPegawai),
+    drawer: buildDrawer(context, widget.idPegawai),
+    body: profileData == null
+        ? Center(child: Text('No profile data found.'))
+        : CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 5.0),
+                  padding: const EdgeInsets.all(16.0), // Padding only for the content
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -216,70 +216,87 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               ),
-            ),
+            ]),
     );
   }
 
   Widget _buildProfileImage() {
-    print('Profile image data: ${profileData!['url_foto']}');
-    if (profileData != null && profileData!['url_foto'] != null) {
-      if (profileData!['url_foto'].startsWith('http')) {
-        // Image from a URL
-        return Center(
+  print('Profile image data: ${profileData!['url_foto']}');
+  if (profileData != null && profileData!['url_foto'] != null) {
+    if (profileData!['url_foto'].startsWith('http')) {
+      // Image from a URL
+      return Center(
+        child: Container(
+          width: 170, // Explicit size
+          height: 170, // Explicit size
           child: ClipOval(
             child: Image.network(
               profileData!['url_foto'],
-              height: 120,
-              width: 120,
+              height: 170, // Ensure this size is respected
+              width: 170,  // Ensure this size is respected
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return ClipOval(
-                  child: Icon(Icons.account_circle, size: 150),
+                  child: Icon(Icons.account_circle, size: 170), // Increased size
                 );
               },
             ),
           ),
-        );
-      } else {
-        try {
-          // Image is base64 encoded
-          final decodedBytes = base64Decode(profileData!['url_foto']);
+        ),
+      );
+    } else {
+      try {
+        // Image is base64 encoded
+        final decodedBytes = base64Decode(profileData!['url_foto']);
 
-          // Validate image data using the image package
-          final image = img.decodeImage(decodedBytes);
-          if (image == null) {
-            throw Exception('Invalid image data');
-          }
+        // Validate image data using the image package
+        final image = img.decodeImage(decodedBytes);
+        if (image == null) {
+          throw Exception('Invalid image data');
+        }
 
-          return Center(
+        return Center(
+          child: Container(
+            width: 170, // Explicit size
+            height: 170, // Explicit size
             child: ClipOval(
               child: Image.memory(
                 decodedBytes,
-                height: 150,
-                width: 150,
+                height: 170, // Ensure this size is respected
+                width: 170,  // Ensure this size is respected
                 fit: BoxFit.cover,
               ),
             ),
-          );
-        } catch (e) {
-          print('Error decoding base64 image: $e');
-          // Return default icon
-          return Center(
+          ),
+        );
+      } catch (e) {
+        print('Error decoding base64 image: $e');
+        // Return default icon
+        return Center(
+          child: Container(
+            width: 170, // Explicit size
+            height: 170, // Explicit size
             child: ClipOval(
-              child: Icon(Icons.account_circle, size: 150),
+              child: Icon(Icons.account_circle, size: 170), // Increased size
             ),
-          );
-        }
+          ),
+        );
       }
-    } else {
-      // Default icon
-      return Center(
-        child: ClipOval(
-          child: Icon(Icons.account_circle, size: 150),
-        ),
-      );
     }
+  } else {
+    // Default icon
+    return Center(
+      child: Container(
+        width: 170, // Explicit size
+        height: 170, // Explicit size
+        child: ClipOval(
+          child: Icon(Icons.account_circle, size: 170), // Increased size
+        ),
+      ),
+    );
   }
+}
+
 
   String _formatUnitKerja(String unitKerja) {
     if (unitKerja.isEmpty) {
