@@ -6,7 +6,7 @@ import 'database_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class HomePage extends StatefulWidget {
-  final String idPegawai; // Add idPegawai as a parameter
+  final String idPegawai;
 
   HomePage({required this.idPegawai});
   @override
@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   late Future<int> keluarCount;
   late Future<int> pensiunCount;
   late Future<int> meninggalCount;
-  late Future<List<int>> statusCounts; // For the bar chart
+  late Future<List<int>> statusCounts; // For the charts
 
   @override
   void initState() {
@@ -41,91 +41,92 @@ class _HomePageState extends State<HomePage> {
       key: _scaffoldKey,
       appBar: buildAppBar(_scaffoldKey, 'Dashboard', widget.idPegawai),
       drawer: buildDrawer(context, widget.idPegawai),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Switch between Row in landscape mode and GridView in portrait mode
-                  isLandscape ? _buildCardRow() : _buildCardGrid(),
-                  SizedBox(height: 20),
-                  _buildPieChart(), // The pie chart section
-                  SizedBox(height: 20),
-                  _buildBarChart(), // The bar chart section
-                ],
-              ),
-            ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              isLandscape ? _buildCardRow() : _buildCardGrid(),
+              _buildPieChart(),
+              SizedBox(height: 20),
+              _buildBarChart(),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // Build a Row for landscape mode
+  // Build a Row for landscape mode without scrolling
   Widget _buildCardRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Expanded(child: _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount)),
-        Expanded(child: _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount)),
-        Expanded(child: _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount)),
-        Expanded(child: _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount)),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double cardWidth = (constraints.maxWidth / 4) - 16;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount, cardWidth),
+            _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount, cardWidth),
+            _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount, cardWidth),
+            _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount, cardWidth),
+          ],
+        );
+      },
     );
   }
 
   // Build a Grid for portrait mode
   Widget _buildCardGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 20,
-      mainAxisSpacing: 20,
-      childAspectRatio: 2 / 1.5,
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      children: [
-        _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount),
-        _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount),
-        _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount),
-        _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double cardWidth = constraints.maxWidth / 2 - 24;
+        return GridView.count(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: cardWidth / (cardWidth * 0.75),
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount, cardWidth),
+            _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount, cardWidth),
+            _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount, cardWidth),
+            _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount, cardWidth),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildStatCard(String label, IconData icon, Color color, Future<int> countFuture) {
+  Widget _buildStatCard(String label, IconData icon, Color color, Future<int> countFuture, double width) {
     return FutureBuilder<int>(
       future: countFuture,
       builder: (context, snapshot) {
         String value = snapshot.hasData ? snapshot.data.toString() : '0';
+
         return Column(
           children: [
             Card(
               elevation: 4,
-              margin: const EdgeInsets.symmetric(horizontal: 20.0),
+              margin: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Container(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
+                width: width,
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          icon,
-                          size: 38,
-                          color: color,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          value,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: color,
-                          ),
-                        ),
-                      ],
+                    Icon(
+                      icon,
+                      size: 30,
+                      color: color,
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: color,
+                      ),
                     ),
                   ],
                 ),
@@ -135,7 +136,7 @@ class _HomePageState extends State<HomePage> {
             Text(
               label,
               style: GoogleFonts.roboto(
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),
@@ -151,7 +152,11 @@ class _HomePageState extends State<HomePage> {
       future: statusCounts,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator(color: Color(0xFF0053C5),));
+          return Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF0053C5),
+            ),
+          );
         }
 
         List<int> counts = snapshot.data!;
@@ -173,11 +178,11 @@ class _HomePageState extends State<HomePage> {
                       counts.length,
                       (index) => PieChartSectionData(
                         value: counts[index].toDouble(),
-                        title: '${percentages[index].toStringAsFixed(1)}%', // Show percentage
-                        color: Colors.primaries[index % Colors.primaries.length], // Cycle through colors
+                        title: '${percentages[index].toStringAsFixed(1)}%',
+                        color: Colors.primaries[index % Colors.primaries.length],
                         radius: 50,
                         titleStyle: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
@@ -190,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               SizedBox(height: 16),
-              _buildLegend(labels), // Add the legend below the pie chart
+              _buildLegend(labels),
             ],
           ),
         );
@@ -199,25 +204,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildLegend(List<String> labels) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 10,
       children: List.generate(labels.length, (index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-          child: Row(
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                color: Colors.primaries[index % Colors.primaries.length],
-              ),
-              SizedBox(width: 4),
-              Text(
-                labels[index],
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 14,
+              height: 14,
+              color: Colors.primaries[index % Colors.primaries.length],
+            ),
+            SizedBox(width: 4),
+            Text(
+              labels[index],
+              style: TextStyle(fontSize: 12),
+            ),
+          ],
         );
       }),
     );
@@ -228,7 +232,11 @@ class _HomePageState extends State<HomePage> {
       future: statusCounts,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator(color: Color(0xFF0053C5),));
+          return Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF0053C5),
+            ),
+          );
         }
 
         List<int> counts = snapshot.data!;
@@ -263,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                           child: Text(
                             labels[value.toInt()],
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -296,8 +304,8 @@ class _HomePageState extends State<HomePage> {
                       BarChartRodData(
                         toY: counts[index].toDouble(),
                         color: Colors.blue,
-                        width: 20,
-                        borderRadius: BorderRadius.circular(6),
+                        width: 16,
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ],
                   ),
