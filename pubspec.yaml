@@ -77,10 +77,13 @@ flutter:
     - assets/BG.jpg
 
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/Logo_YPIA.png"
+  remove_alpha_ios: true
+
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
