@@ -41,11 +41,10 @@ AppBar buildAppBar(GlobalKey<ScaffoldState> scaffoldKey, String title, String id
             String jabatanPegawai = snapshot.data!['nama_jabatan'] as String;
 
             bool isDue = difference.inDays <= 90;
-            Color tooltipColor = difference.isNegative ? Colors.red : Colors.black;
 
             return GestureDetector(
               onTap: () {
-                final overlay = Overlay.of(context)?.context.findRenderObject();
+                final overlay = Overlay.of(context).context.findRenderObject();
                 final renderBox = context.findRenderObject() as RenderBox;
                 final size = renderBox.size;
                 final position = renderBox.localToGlobal(Offset.zero, ancestor: overlay);

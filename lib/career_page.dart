@@ -163,7 +163,7 @@ class CareerPage extends StatelessWidget {
       String downloadsPath = '/storage/emulated/0/Pictures';
 
       // Generate a unique file name using the current timestamp
-      String fileName = 'downloaded_image_${DateTime.now().millisecondsSinceEpoch}.png';
+      String fileName = 'SK_Jabatan_${DateTime.now().millisecondsSinceEpoch}.png';
       String filePath = '$downloadsPath/$fileName';
 
       // Write the file
@@ -172,7 +172,7 @@ class CareerPage extends StatelessWidget {
 
       // Show a snackbar or dialog to confirm the download
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(content: Text('File downloaded to: $filePath')),
+        SnackBar(content: Text('File diunduh ke: $filePath')),
       );
     } catch (e) {
       // Handle errors if the download fails

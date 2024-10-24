@@ -217,7 +217,7 @@ class _DP4KPageState extends State<DP4KPage> {
     String monthYearDisplay = DateFormat('MMMM yyyy').format(_selectedDate);
     return Scaffold(
       key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'DP4K Form', widget.idPegawai),
+      appBar: buildAppBar(_scaffoldKey, 'Form DP4K', widget.idPegawai),
       drawer: buildDrawer(context, widget.idPegawai),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -239,16 +239,16 @@ class _DP4KPageState extends State<DP4KPage> {
               ),
             ),
             SizedBox(height: 16),
-            Text(
-              'DP4K Evaluation for Employee: ${widget.idPegawai}',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
+            // Text(
+            //   'DP4K Evaluation for Employee: ${widget.idPegawai}',
+            //   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            // ),
+            // SizedBox(height: 16),
             Row(
               children: [
                 Text(
-                  'Set All Values to:',
-                  style: TextStyle(fontSize: 16),
+                  'Atur semua aspek:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(width: 8),
                 DropdownButton<int>(
@@ -272,16 +272,61 @@ class _DP4KPageState extends State<DP4KPage> {
             ),
             SizedBox(height: 16),
             _buildAccordion(),
-            SizedBox(height: 24),
-            Text(
-              'Total Score: ${_calculateTotalScore()} / $maxScore',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
             SizedBox(height: 8),
+Card(
+  elevation: 4,
+  margin: EdgeInsets.symmetric(vertical: 16),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(10),
+  ),
+  child: Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.grade, color: Colors.amber, size: 28),
+            SizedBox(width: 8),
             Text(
-              'Final Percentage: ${_calculatePercentage().toStringAsFixed(2)}%',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Nilai Total',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
+            Spacer(),
+            Text(
+              '${_calculateTotalScore()} / $maxScore',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        Row(
+          children: [
+            Icon(Icons.percent, color: Colors.green, size: 28),
+            SizedBox(width: 8),
+            Text(
+              'Persentase',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            ),
+            Spacer(),
+            Text(
+              '${_calculatePercentage().toStringAsFixed(2)}%',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        LinearProgressIndicator(
+          value: _calculatePercentage() / 100,
+          backgroundColor: Colors.grey[300],
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+          minHeight: 8,
+        ),
+      ],
+    ),
+  ),
+),
+
           ],
         ),
       ),
