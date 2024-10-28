@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   late Future<int> keluarCount;
   late Future<int> pensiunCount;
   late Future<int> meninggalCount;
-  late Future<List<int>> statusCounts; // For the charts
+  late Future<List<int>> statusCounts;
 
   @override
   void initState() {
@@ -41,99 +41,104 @@ class _HomePageState extends State<HomePage> {
       key: _scaffoldKey,
       appBar: buildAppBar(_scaffoldKey, 'Dashboard', widget.idPegawai),
       drawer: buildDrawer(context, widget.idPegawai),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              isLandscape ? _buildCardRow() : _buildCardGrid(),
-              _buildPieChart(),
-              SizedBox(height: 20),
-              _buildBarChart(),
-            ],
-          ),
-        ),
-      ),
+     body: SingleChildScrollView(
+  child: Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Column(
+      children: [
+        _buildResponsiveCardLayout(isLandscape),
+        _buildPieChart(),
+        SizedBox(height: 20),
+        _buildBarChart(),
+      ],
+    ),
+  ),
+),
+
     );
   }
 
-  // Build a Row for landscape mode without scrolling
-  Widget _buildCardRow() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double cardWidth = (constraints.maxWidth / 4) - 16;
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount, cardWidth),
-            _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount, cardWidth),
-            _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount, cardWidth),
-            _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount, cardWidth),
-          ],
-        );
-      },
-    );
-  }
+Widget _buildResponsiveCardLayout(bool isLandscape) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      int crossAxisCount = isLandscape ? 4 : 2; // 1x4 in landscape, 2x2 in portrait
 
-  // Build a Grid for portrait mode
-  Widget _buildCardGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double cardWidth = constraints.maxWidth / 2 - 24;
-        return GridView.count(
-          crossAxisCount: 2,
+      // Reduce the card size by 20px
+      double cardSize = (constraints.maxWidth / crossAxisCount) - 16 - 20; // Subtract 20px for reduction
+
+      return GridView.builder(
+        physics: NeverScrollableScrollPhysics(), // Prevent scrolling within the grid
+        shrinkWrap: true, // Wrap content within available space
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: cardWidth / (cardWidth * 0.75),
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          children: [
-            _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount, cardWidth),
-            _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount, cardWidth),
-            _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount, cardWidth),
-            _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount, cardWidth),
-          ],
-        );
-      },
-    );
-  }
+          childAspectRatio: 0.95, // Maintain aspect ratio, adjust for height
+        ),
+        itemCount: 4, // Total number of cards
+        itemBuilder: (context, index) {
+          switch (index) {
+            case 0:
+              return _buildStatCard('Aktif', Icons.person, Colors.green, aktifCount, cardSize);
+            case 1:
+              return _buildStatCard('Keluar', Icons.logout, Colors.red, keluarCount, cardSize);
+            case 2:
+              return _buildStatCard('Pensiun', Icons.calendar_today, Colors.orange, pensiunCount, cardSize);
+            case 3:
+              return _buildStatCard('Meninggal', Icons.heart_broken, Colors.grey, meninggalCount, cardSize);
+            default:
+              return Container(); // Safety fallback
+          }
+        },
+      );
+    },
+  );
+}
 
-  Widget _buildStatCard(String label, IconData icon, Color color, Future<int> countFuture, double width) {
-    return FutureBuilder<int>(
-      future: countFuture,
-      builder: (context, snapshot) {
-        String value = snapshot.hasData ? snapshot.data.toString() : '0';
+Widget _buildStatCard(String label, IconData icon, Color color, Future<int> countFuture, double size) {
+  return FutureBuilder<int>(
+    future: countFuture,
+    builder: (context, snapshot) {
+      String value = snapshot.hasData ? snapshot.data.toString() : '0';
 
-        return Column(
-          children: [
-            Card(
-              elevation: 4,
-              margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Container(
-                width: width,
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
+      return Column(
+        children: [
+          Card(
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
+            child: Container(
+              width: size,
+              height: size * 0.9, // Keep the height proportional to the reduced size
+              padding: const EdgeInsets.all(4.0), // Keep minimal padding
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Use Flexible to ensure icon and text fit within the available space
+                  Flexible(
+                    child: Icon(
                       icon,
-                      size: 30,
+                      size: 30, // Adjust this size as needed
                       color: color,
                     ),
-                    SizedBox(height: 4),
-                    Text(
+                  ),
+                  SizedBox(height: 4), // Keep small spacing to avoid overflow
+                  Flexible(
+                    child: Text(
                       value,
                       style: TextStyle(
                         fontSize: 14,
                         color: color,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 8),
-            Text(
+          ),
+          SizedBox(height: 4),
+          // Label text should not overflow
+          Flexible(
+            child: Text(
               label,
               style: GoogleFonts.roboto(
                 fontSize: 14,
@@ -141,11 +146,13 @@ class _HomePageState extends State<HomePage> {
                 color: Colors.black,
               ),
             ),
-          ],
-        );
-      },
-    );
-  }
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   Widget _buildPieChart() {
     return FutureBuilder<List<int>>(
@@ -161,8 +168,6 @@ class _HomePageState extends State<HomePage> {
 
         List<int> counts = snapshot.data!;
         List<String> labels = ['GTYK', 'GTY', 'TUY', 'TUYK', 'KTY'];
-
-        // Calculate total count to compute percentages
         int total = counts.reduce((a, b) => a + b);
         List<double> percentages = counts.map((count) => (count / total) * 100).toList();
 
