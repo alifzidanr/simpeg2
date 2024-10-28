@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'dart:io';
 import 'package:image/image.dart' as img; 
 
 class ProfilePage extends StatefulWidget {
@@ -39,8 +40,18 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       print('Error fetching profile data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengambil data profil')),
-      );
+  SnackBar(
+    content: Text(
+      'Gagal mengambil data profil',
+      style: TextStyle(
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    ),
+    backgroundColor: Colors.red,
+  ),
+);
     } finally {
       setState(() {
         _isLoading = false; // Stop loading after data is fetched
@@ -87,16 +98,39 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<void> _requestFilePermission() async {
-    final status = await Permission.storage.request();
-    if (status.isGranted) {
-      _pickImage();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Izin ditolak')),
-      );
-    }
+ Future<void> _requestFilePermission() async {
+  PermissionStatus status;
+
+  // Check if Android 13+ and request specific media permission
+  if (Platform.isAndroid && await Permission.photos.isDenied) {
+    status = await Permission.photos.request();
+  } else if (Platform.isAndroid && await Permission.mediaLibrary.isDenied) {
+    status = await Permission.mediaLibrary.request();
+  } else {
+    // Fallback for general storage permission for older Android versions
+    status = await Permission.storage.request();
   }
+
+  if (status.isGranted) {
+    _pickImage();
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Izin ditolak',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -112,21 +146,52 @@ class _ProfilePageState extends State<ProfilePage> {
         print('Image uploaded/updated: ${pickedFile.path}');
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gambar berhasil diunggah!')),
-        );
+  SnackBar(
+    content: Text(
+      'Gambar berhasil diunggah!',
+      style: TextStyle(
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    ),
+    backgroundColor: Colors.green,
+  ),
+);
+
 
         await _fetchProfileData();
       } catch (e) {
         print('Error picking image: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mengunggah gambar!')),
-        );
+  SnackBar(
+    content: Text(
+      'Gagal mengunggah gambar!',
+      style: TextStyle(
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
+    ),
+    backgroundColor: Colors.red,
+  ),
+);
       }
     } else {
       print('No image selected.');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tidak ada gambar yang dipilih.')),
-      );
+  SnackBar(
+    content: Text(
+      'Tidak ada gambar yang dipilih.',
+      style: TextStyle(
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+    ),
+    backgroundColor: Colors.yellow,
+  ),
+);
     }
   }
 
@@ -136,8 +201,18 @@ class _ProfilePageState extends State<ProfilePage> {
     await _fetchProfileData();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Foto berhasil dihapus!')),
-    );
+  SnackBar(
+    content: Text(
+      'Foto berhasil dihapus!',
+      style: TextStyle(
+        fontFamily: 'Roboto',
+        fontWeight: FontWeight.bold,
+        color: Colors.black,
+      ),
+    ),
+    backgroundColor: Colors.yellow,
+  ),
+);
 
     print('Foto dihapus.');
   }
