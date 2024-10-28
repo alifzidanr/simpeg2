@@ -8,7 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 class CareerPage extends StatelessWidget {
   final String idPegawai; // Add idPegawai as a parameter
-
+  
   CareerPage({required this.idPegawai});
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -34,31 +34,19 @@ class CareerPage extends StatelessWidget {
 
           return Row(
             children: [
-              // Fixed "No." column with correct height adjustment
+              // Fixed "No." column
               SingleChildScrollView(
-                child: Table(
-                  columnWidths: const {0: FixedColumnWidth(50)}, // Fixed width for the "No." column
+                child: Column(
                   children: [
-                    TableRow(
-                      children: [
-                        Container(
-                          height: 56, // Same height as the header row of DataTable
-                          child: Center(
-                            child: Text('No.', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
+                    Container(
+                      width: 50, // Width for the fixed "No." header
+                      child: Center(child: Text('No.', style: TextStyle(fontWeight: FontWeight.bold))),
                     ),
                     ...List.generate(careerData.length, (index) {
-                      return TableRow(
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).orientation == Orientation.landscape
-                                ? MediaQuery.of(context).size.height * 0.15
-                                : MediaQuery.of(context).size.height * 0.1, // Match the row height of DataTable
-                            child: Center(child: Text('${index + 1}')),
-                          ),
-                        ],
+                      return Container(
+                        width: 50, // Width for each row in the "No." column
+                        height: 100, // Match the row height of the main table
+                        child: Center(child: Text('${index + 1}')),
                       );
                     }),
                   ],
@@ -69,9 +57,7 @@ class CareerPage extends StatelessWidget {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal, // Enable horizontal scrolling
                   child: DataTable(
-                    dataRowHeight: MediaQuery.of(context).orientation == Orientation.landscape
-                        ? MediaQuery.of(context).size.height * 0.15
-                        : MediaQuery.of(context).size.height * 0.1, // Match the row height of the "No." column
+                    dataRowHeight: 100, // Set the desired height for each row
                     columns: [
                       DataColumn(label: Text('File')),
                       DataColumn(label: Text('No. SK')),
@@ -120,7 +106,7 @@ class CareerPage extends StatelessWidget {
     try {
       // Decode the base64 string
       final bytes = base64Decode(base64String);
-
+      
       return Row(
         children: [
           GestureDetector(
@@ -145,42 +131,32 @@ class CareerPage extends StatelessWidget {
     }
   }
 
-  Future<void> _downloadFile(String base64String) async {
-    try {
-      // Request storage permission
-      var status = await Permission.storage.request();
-      if (!status.isGranted) {
-        ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-          SnackBar(content: Text('Storage permission denied')),
-        );
-        return;
-      }
-
-      // Decode the base64 string to bytes
+ Future<void> _downloadFile(String base64String) async {
+  try {
+    // Request manage storage permission for Android 13+
+    if (await Permission.manageExternalStorage.request().isGranted) {
       final bytes = base64Decode(base64String);
-
-      // Define the path to the Downloads folder
       String downloadsPath = '/storage/emulated/0/Pictures';
-
-      // Generate a unique file name using the current timestamp
-      String fileName = 'SK_Jabatan_${DateTime.now().millisecondsSinceEpoch}.png';
+      String fileName = 'File_Jabatan_${DateTime.now().millisecondsSinceEpoch}.png';
       String filePath = '$downloadsPath/$fileName';
 
-      // Write the file
       File file = File(filePath);
       await file.writeAsBytes(bytes);
 
-      // Show a snackbar or dialog to confirm the download
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(content: Text('File diunduh ke: $filePath')),
+        SnackBar(content: Text('File downloaded to: $filePath')),
       );
-    } catch (e) {
-      // Handle errors if the download fails
+    } else {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(content: Text('Error downloading file: $e')),
+        SnackBar(content: Text('Storage permission denied')),
       );
     }
+  } catch (e) {
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      SnackBar(content: Text('Error downloading file: $e')),
+    );
   }
+}
 
   // Function to show the full screen image
   void _showFullScreenImage(String base64String) {
@@ -189,7 +165,7 @@ class CareerPage extends StatelessWidget {
       builder: (context) {
         // Decode the base64 string for full-screen display
         final bytes = base64Decode(base64String);
-
+        
         return Dialog(
           child: Container(
             constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
