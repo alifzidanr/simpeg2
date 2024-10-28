@@ -131,32 +131,50 @@ class CareerPage extends StatelessWidget {
     }
   }
 
- Future<void> _downloadFile(String base64String) async {
+
+Future<void> _downloadFile(String base64String) async {
   try {
-    // Request manage storage permission for Android 13+
-    if (await Permission.manageExternalStorage.request().isGranted) {
-      final bytes = base64Decode(base64String);
-      String downloadsPath = '/storage/emulated/0/Pictures';
-      String fileName = 'File_Jabatan_${DateTime.now().millisecondsSinceEpoch}.png';
-      String filePath = '$downloadsPath/$fileName';
+    // Request storage permission
+    var status = await Permission.storage.request();
 
-      File file = File(filePath);
-      await file.writeAsBytes(bytes);
-
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(content: Text('File downloaded to: $filePath')),
-      );
-    } else {
+    if (!status.isGranted) {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(content: Text('Storage permission denied')),
       );
+      return;
     }
+
+    // Decode the base64 string to bytes
+    final bytes = base64Decode(base64String);
+
+    // Define the specific directory for storing the file
+    final Directory customDir = Directory('/storage/emulated/0/Pictures/Al-Azhar');
+
+    // Check if the directory exists, and if not, create it
+    if (!await customDir.exists()) {
+      await customDir.create(recursive: true);
+    }
+
+    // Generate a unique file name and define the full file path
+    String fileName = 'File_Jabatan_${DateTime.now().millisecondsSinceEpoch}.png';
+    String filePath = '${customDir.path}/$fileName';
+
+    // Write the file to the specified location
+    File file = File(filePath);
+    await file.writeAsBytes(bytes);
+
+    // Confirm file download to the user
+    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+      SnackBar(content: Text('File downloaded to: $filePath')),
+    );
   } catch (e) {
+    // Handle any errors during the file download process
     ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
       SnackBar(content: Text('Error downloading file: $e')),
     );
   }
 }
+
 
   // Function to show the full screen image
   void _showFullScreenImage(String base64String) {

@@ -5,6 +5,7 @@ import 'database_helper.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
+
 class ClassPage extends StatelessWidget {
   final String idPegawai; // Add idPegawai as a parameter
   
@@ -127,10 +128,9 @@ Widget build(BuildContext context) {
 
 Future<void> _downloadFile(String base64String) async {
   try {
-    // Check if we need MANAGE_EXTERNAL_STORAGE permission for Android 13+
-    var status = await Permission.manageExternalStorage.request();
-    
-    // If permission is not granted, show a message and exit
+    // Request storage permission
+    var status = await Permission.storage.request();
+
     if (!status.isGranted) {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(content: Text('Storage permission denied')),
@@ -140,29 +140,35 @@ Future<void> _downloadFile(String base64String) async {
 
     // Decode the base64 string to bytes
     final bytes = base64Decode(base64String);
-    
-    // Define the path to the Pictures folder (or you can choose Downloads folder)
-    String downloadsPath = '/storage/emulated/0/Pictures';
-    
-    // Generate a unique file name using the current timestamp
-    String fileName = 'File_Golongan_${DateTime.now().millisecondsSinceEpoch}.png';
-    String filePath = '$downloadsPath/$fileName';
 
-    // Write the file
+    // Define the specific directory for storing the file
+    final Directory customDir = Directory('/storage/emulated/0/Pictures/Al-Azhar');
+
+    // Check if the directory exists, and if not, create it
+    if (!await customDir.exists()) {
+      await customDir.create(recursive: true);
+    }
+
+    // Generate a unique file name and define the full file path
+    String fileName = 'File_Golongan_${DateTime.now().millisecondsSinceEpoch}.png';
+    String filePath = '${customDir.path}/$fileName';
+
+    // Write the file to the specified location
     File file = File(filePath);
     await file.writeAsBytes(bytes);
-    
-    // Show a snackbar or dialog to confirm the download
+
+    // Confirm file download to the user
     ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
       SnackBar(content: Text('File downloaded to: $filePath')),
     );
   } catch (e) {
-    // Handle errors if the download fails
+    // Handle any errors during the file download process
     ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
       SnackBar(content: Text('Error downloading file: $e')),
     );
   }
 }
+
 
 
   // Function to show the full screen image

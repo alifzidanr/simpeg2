@@ -6,7 +6,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'dart:io';
 import 'package:image/image.dart' as img; 
 
 class ProfilePage extends StatefulWidget {
@@ -99,25 +98,38 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
  Future<void> _requestFilePermission() async {
-  PermissionStatus status;
+  // Check if storage permission is already granted
+  var status = await Permission.storage.status;
 
-  // Check if Android 13+ and request specific media permission
-  if (Platform.isAndroid && await Permission.photos.isDenied) {
-    status = await Permission.photos.request();
-  } else if (Platform.isAndroid && await Permission.mediaLibrary.isDenied) {
-    status = await Permission.mediaLibrary.request();
-  } else {
-    // Fallback for general storage permission for older Android versions
+  // Retry logic if permission was previously denied
+  if (status.isDenied) {
     status = await Permission.storage.request();
   }
 
+  // If permission is granted, proceed with image selection
   if (status.isGranted) {
     _pickImage();
+  } else if (status.isPermanentlyDenied) {
+    // If permanently denied, prompt the user to open app settings
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Storage permission is permanently denied. Please enable it in settings.',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+    await openAppSettings();
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Izin ditolak',
+          'Storage permission denied.',
           style: TextStyle(
             fontFamily: 'Roboto',
             fontWeight: FontWeight.bold,
@@ -132,68 +144,66 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
 
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      try {
-        final bytes = await pickedFile.readAsBytes();
-        final base64Image = base64Encode(bytes);
+Future<void> _pickImage() async {
+  final picker = ImagePicker();
+  final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-        await DatabaseHelper.instance.updateEmployeePhoto(widget.idPegawai, base64Image);
+  if (pickedFile != null) {
+    try {
+      final bytes = await pickedFile.readAsBytes();
+      final base64Image = base64Encode(bytes);
 
-        print('Image uploaded/updated: ${pickedFile.path}');
+      await DatabaseHelper.instance.updateEmployeePhoto(widget.idPegawai, base64Image);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(
-      'Gambar berhasil diunggah!',
-      style: TextStyle(
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    ),
-    backgroundColor: Colors.green,
-  ),
-);
-
-
-        await _fetchProfileData();
-      } catch (e) {
-        print('Error picking image: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(
-      'Gagal mengunggah gambar!',
-      style: TextStyle(
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    ),
-    backgroundColor: Colors.red,
-  ),
-);
-      }
-    } else {
-      print('No image selected.');
       ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(
-      'Tidak ada gambar yang dipilih.',
-      style: TextStyle(
-        fontFamily: 'Roboto',
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
-      ),
-    ),
-    backgroundColor: Colors.yellow,
-  ),
-);
+        SnackBar(
+          content: Text(
+            'Image successfully uploaded!',
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      await _fetchProfileData();
+    } catch (e) {
+      print('Error picking image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Failed to upload image!',
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'No image selected.',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        backgroundColor: Colors.yellow,
+      ),
+    );
   }
+}
+
 
   void _deletePhoto() async {
     await DatabaseHelper.instance.deleteEmployeePhoto(widget.idPegawai);
