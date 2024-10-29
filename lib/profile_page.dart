@@ -6,7 +6,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:image/image.dart' as img; 
+import 'package:image/image.dart' as img;
+import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class ProfilePage extends StatefulWidget {
   final String idPegawai;
@@ -58,25 +60,30 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Future<void> _showImageOptions() async {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextButton(
+ Future<void> _showImageOptions() async {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (context) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity, // Make button as wide as the bottom sheet
+              child: TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                   _requestFilePermission();
                 },
                 child: Text('Ganti Foto'),
               ),
-              TextButton(
+            ),
+            SizedBox(
+              width: double.infinity, // Make button as wide as the bottom sheet
+              child: TextButton(
                 onPressed: () {
                   _deletePhoto();
                   Navigator.of(context).pop();
@@ -86,35 +93,61 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(color: Colors.red),
                 ),
               ),
-              TextButton(
+            ),
+            SizedBox(
+              width: double.infinity, // Make button as wide as the bottom sheet
+              child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text('Batal'),
               ),
-            ],
-          ),
-        );
-      },
-    );
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+
+Future<void> _requestFilePermission() async {
+  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  PermissionStatus status;
+
+  if (Platform.isAndroid) {
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+
+    if (androidInfo.version.sdkInt >= 33) {
+      // For Android 13 and above, request READ_MEDIA_IMAGES permission
+      status = await Permission.photos.status;
+
+      if (status.isDenied) {
+        status = await Permission.photos.request();
+      }
+    } else {
+      // For Android 12 and below, request storage permission
+      status = await Permission.storage.status;
+
+      if (status.isDenied) {
+        status = await Permission.storage.request();
+      }
+    }
+  } else {
+    // Handle iOS or other platforms if necessary
+    status = await Permission.storage.status;
+
+    if (status.isDenied) {
+      status = await Permission.storage.request();
+    }
   }
 
- Future<void> _requestFilePermission() async {
-  // Check if storage permission is already granted
-  var status = await Permission.storage.status;
-
-  // Retry logic if permission was previously denied
-  if (status.isDenied) {
-    status = await Permission.storage.request();
-  }
-
-  // If permission is granted, proceed with image selection
+  // Handle permission results
   if (status.isGranted) {
     _pickImage();
   } else if (status.isPermanentlyDenied) {
-    // If permanently denied, prompt the user to open app settings
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Storage permission is permanently denied. Please enable it in settings.',
+          'Izin penyimpanan ditolak secara permanen. Silakan aktifkan di pengaturan.',
           style: TextStyle(
             fontFamily: 'Roboto',
             fontWeight: FontWeight.bold,
@@ -129,7 +162,7 @@ class _ProfilePageState extends State<ProfilePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Storage permission denied.',
+          'Izin penyimpanan ditolak.',
           style: TextStyle(
             fontFamily: 'Roboto',
             fontWeight: FontWeight.bold,
@@ -141,7 +174,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-
 
 
 
@@ -159,7 +191,7 @@ Future<void> _pickImage() async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Image successfully uploaded!',
+            'Gambar berhasil diunggah!',
             style: TextStyle(
               fontFamily: 'Roboto',
               fontWeight: FontWeight.bold,
@@ -176,7 +208,7 @@ Future<void> _pickImage() async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Failed to upload image!',
+            'Gagal mengunggah gambar!',
             style: TextStyle(
               fontFamily: 'Roboto',
               fontWeight: FontWeight.bold,
@@ -191,7 +223,7 @@ Future<void> _pickImage() async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'No image selected.',
+          'Tidak ada gambar yang dipilih.',
           style: TextStyle(
             fontFamily: 'Roboto',
             fontWeight: FontWeight.bold,
@@ -240,7 +272,7 @@ Future<void> _pickImage() async {
               ),
             )
           : profileData == null
-              ? Center(child: Text('No profile data found.'))
+              ? Center(child: Text('Data profil tidak ditemukan.'))
               : CustomScrollView(
                   slivers: [
                     SliverToBoxAdapter(

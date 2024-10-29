@@ -1,4 +1,4 @@
-package com.example.test09204_simpeg
+package com.example.simpeg_al_azhar
 
 import io.flutter.embedding.android.FlutterActivity
 

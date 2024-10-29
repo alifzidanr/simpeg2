@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 
 class CareerPage extends StatelessWidget {
-  final String idPegawai; // Add idPegawai as a parameter
-  
+  final String idPegawai;
+
   CareerPage({required this.idPegawai});
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -17,13 +17,13 @@ class CareerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: buildAppBar(_scaffoldKey, 'Riwayat Jabatan', idPegawai), // Pass idPegawai here
+      appBar: buildAppBar(_scaffoldKey, 'Riwayat Jabatan', idPegawai),
       drawer: buildDrawer(context, idPegawai),
       body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: DatabaseHelper.instance.getCareerData(idPegawai), // Fetch your career data
+        future: DatabaseHelper.instance.getCareerData(idPegawai),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator(color: Color(0xFF0053C5),));
+            return Center(child: CircularProgressIndicator(color: Color(0xFF0053C5)));
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -32,94 +32,92 @@ class CareerPage extends StatelessWidget {
 
           final careerData = snapshot.data!;
 
-          return Row(
-            children: [
-              // Fixed "No." column
-              SingleChildScrollView(
-                child: Column(
+          return SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
                   children: [
                     Container(
-                      width: 50, // Width for the fixed "No." header
-                      child: Center(child: Text('No.', style: TextStyle(fontWeight: FontWeight.bold))),
+                      width: 50,
+                      padding: const EdgeInsets.only(top: 18, bottom: 8, left: 14),
+                      child: const Text('No.', style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                     ...List.generate(careerData.length, (index) {
                       return Container(
-                        width: 50, // Width for each row in the "No." column
-                        height: 100, // Match the row height of the main table
+                        width: 50,
+                        height: 100,
                         child: Center(child: Text('${index + 1}')),
                       );
                     }),
                   ],
                 ),
-              ),
-              // Scrollable table for other columns
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal, // Enable horizontal scrolling
-                  child: DataTable(
-                    dataRowHeight: 100, // Set the desired height for each row
-                    columns: [
-                      DataColumn(label: Text('File')),
-                      DataColumn(label: Text('No. SK')),
-                      DataColumn(label: Text('Perihal')),
-                      DataColumn(label: Text('Tanggal SK')),
-                      DataColumn(label: Text('Tanggal Berlaku')),
-                      DataColumn(label: Text('Tanggal Berakhir')),
-                      DataColumn(label: Text('Jabatan')),
-                      DataColumn(label: Text('Unit Kerja')),
-                      DataColumn(label: Text('Aktif')),
-                    ],
-                    rows: careerData.map<DataRow>((career) {
-                      return DataRow(cells: [
-                        DataCell(getFileCell(career['file_jabatan'] ?? '')),
-                        DataCell(Text(career['no_sk'] ?? '')),
-                        DataCell(Text(career['hal'] ?? '')),
-                        DataCell(Text(career['tgl_sk'] ?? '')),
-                        DataCell(Text(career['tgl_berlaku'] ?? '')),
-                        DataCell(Text(career['tgl_sd'] ?? '')),
-                        DataCell(Text(career['jabatan'] ?? '')),
-                        DataCell(Text(formatUnitKerja(career['unit_kerja'] ?? ''))),
-                        DataCell(Text(career['status_aktif'] ?? '')),
-                      ]);
-                    }).toList(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      dataRowHeight: 100,
+                      columns: [
+                        DataColumn(label: Text('File')),
+                        DataColumn(label: Text('No. SK')),
+                        DataColumn(label: Text('Perihal')),
+                        DataColumn(label: Text('Tanggal SK')),
+                        DataColumn(label: Text('Tanggal Berlaku')),
+                        DataColumn(label: Text('Tanggal Berakhir')),
+                        DataColumn(label: Text('Jabatan')),
+                        DataColumn(label: Text('Unit Kerja')),
+                        DataColumn(label: Text('Aktif')),
+                      ],
+                      rows: careerData.map<DataRow>((career) {
+                        return DataRow(cells: [
+                          DataCell(getFileCell(career['file_jabatan'] ?? '')),
+                          DataCell(Text(career['no_sk'] ?? '')),
+                          DataCell(Text(career['hal'] ?? '')),
+                          DataCell(Text(career['tgl_sk'] ?? '')),
+                          DataCell(Text(career['tgl_berlaku'] ?? '')),
+                          DataCell(Text(career['tgl_sd'] ?? '')),
+                          DataCell(Text(career['jabatan'] ?? '')),
+                          DataCell(Text(formatUnitKerja(career['unit_kerja'] ?? ''))),
+                          DataCell(Text(career['status_aktif'] ?? '')),
+                        ]);
+                      }).toList(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  // Function to format unit kerja
   String formatUnitKerja(String unitKerja) {
-    // Remove "40-" and "TRIAL" from the string
     return unitKerja.replaceAll(RegExp(r'^\d+-|TRIAL-', caseSensitive: false), '').trim();
   }
 
   Widget getFileCell(String base64String) {
     if (base64String.isEmpty) {
-      return Text('No file');
+      return const Text('No file');
     }
 
     try {
-      // Decode the base64 string
       final bytes = base64Decode(base64String);
-      
+
       return Row(
         children: [
           GestureDetector(
-            onTap: () => _showFullScreenImage(base64String), // Show full screen image on tap
+            onTap: () => _showFullScreenImage(base64String),
             child: Image.memory(
-              bytes, // Use Image.memory to display the image
-              width: 50, // Set your desired width
-              height: 50, // Set your desired height
-              fit: BoxFit.cover, // Fit the image in the box
+              bytes,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
             ),
           ),
           IconButton(
-            icon: Icon(Icons.download),
+            icon: const Icon(Icons.download),
             onPressed: () async {
               await _downloadFile(base64String);
             },
@@ -127,71 +125,113 @@ class CareerPage extends StatelessWidget {
         ],
       );
     } catch (e) {
-      return Text('Error loading image'); // Display error if decoding fails
+      return const Text('Error loading image');
     }
   }
 
+  Future<void> _downloadFile(String base64String) async {
+    try {
+      if (Platform.isAndroid) {
+        var status = await Permission.manageExternalStorage.request();
+        if (!status.isGranted) {
+          ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Izin penyimpanan ditolak',
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
 
-Future<void> _downloadFile(String base64String) async {
-  try {
-    // Request storage permission
-    var status = await Permission.storage.request();
+      final bytes = base64Decode(base64String);
+      final directory = Directory('/storage/emulated/0/Pictures/Al-Azhar');
+      
+      if (!(await directory.exists())) {
+        await directory.create(recursive: true);
+      }
 
-    if (!status.isGranted) {
+      final filePath = '${directory.path}/File_Jabatan_${DateTime.now().millisecondsSinceEpoch}.png';
+      File file = File(filePath);
+      await file.writeAsBytes(bytes);
+
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-        SnackBar(content: Text('Storage permission denied')),
+        SnackBar(content: Text('File downloaded to: $filePath')),
       );
-      return;
+    } catch (e) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(content: Text('Error downloading file: $e')),
+      );
     }
-
-    // Decode the base64 string to bytes
-    final bytes = base64Decode(base64String);
-
-    // Define the specific directory for storing the file
-    final Directory customDir = Directory('/storage/emulated/0/Pictures/Al-Azhar');
-
-    // Check if the directory exists, and if not, create it
-    if (!await customDir.exists()) {
-      await customDir.create(recursive: true);
-    }
-
-    // Generate a unique file name and define the full file path
-    String fileName = 'File_Jabatan_${DateTime.now().millisecondsSinceEpoch}.png';
-    String filePath = '${customDir.path}/$fileName';
-
-    // Write the file to the specified location
-    File file = File(filePath);
-    await file.writeAsBytes(bytes);
-
-    // Confirm file download to the user
-    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-      SnackBar(content: Text('File downloaded to: $filePath')),
-    );
-  } catch (e) {
-    // Handle any errors during the file download process
-    ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
-      SnackBar(content: Text('Error downloading file: $e')),
-    );
   }
-}
 
-
-  // Function to show the full screen image
   void _showFullScreenImage(String base64String) {
     showDialog(
       context: _scaffoldKey.currentContext!,
       builder: (context) {
-        // Decode the base64 string for full-screen display
         final bytes = base64Decode(base64String);
-        
-        return Dialog(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
-            child: Image.memory(
-              bytes,
-              fit: BoxFit.contain,
+        final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+        final TransformationController _transformationController = TransformationController();
+
+        return Stack(
+          children: [
+            GestureDetector(
+              onDoubleTap: () {
+                // Reset to original zoom level on double-tap
+                _transformationController.value = Matrix4.identity();
+              },
+              child: Dialog(
+                backgroundColor: Colors.transparent,
+                insetPadding: isLandscape ? EdgeInsets.zero : const EdgeInsets.all(8.0),
+                child: ClipRRect(
+                  borderRadius: isLandscape ? BorderRadius.zero : BorderRadius.circular(12.0),
+                  child: InteractiveViewer(
+                    transformationController: _transformationController,
+                    panEnabled: true,
+                    minScale: 1.0,
+                    maxScale: 4.0,
+                    child: Image.memory(
+                      bytes,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
             ),
+            Positioned(
+  top: 32,
+  right: 16,
+  child: GestureDetector(
+    onTap: () => Navigator.of(context).pop(),
+    child: Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          'Close',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Roboto',
           ),
+        ),
+      ),
+    ),
+  ),
+),
+          ],
         );
       },
     );
