@@ -13,10 +13,22 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    _checkLoginStatus();
+void initState() {
+  super.initState();
+  _loadNipFromPrefs();
+  _checkLoginStatus();
+}
+
+void _loadNipFromPrefs() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? nip = prefs.getString('nip');
+  if (nip != null) {
+    setState(() {
+      _nipController.text = nip;
+    });
   }
+}
+
 
   void _checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

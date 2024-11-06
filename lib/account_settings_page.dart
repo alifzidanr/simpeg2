@@ -23,85 +23,103 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   bool _isExpanded = false;
   bool _isContactExpanded = false; 
 
-  void _updatePassword() async {
-    String currentPassword = _currentPasswordController.text;
-    String newPassword = _newPasswordController.text;
-    String confirmPassword = _confirmPasswordController.text;
+ void _updatePassword() async {
+  String currentPassword = _currentPasswordController.text;
+  String newPassword = _newPasswordController.text;
+  String confirmPassword = _confirmPasswordController.text;
 
-    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(
-      'Harap isi semua kolom.',
-      style: TextStyle(
-        fontFamily: 'Roboto', // Using Roboto for the font
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    ),
-    backgroundColor: Colors.red, // Set background color to red
-  ),
-);
-      return;
-    }
-
-    if (newPassword != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(
-      'Password baru dan konfirmasi tidak cocok.',
-      style: TextStyle(
-        fontFamily: 'Roboto', // Using Roboto for the font
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    ),
-    backgroundColor: Colors.red, // Set background color to red
-  ),
-);
-      return;
-    }
-
-    bool isCurrentPasswordValid = await DatabaseHelper.instance.login(widget.idPegawai, currentPassword);
-    if (!isCurrentPasswordValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(
-      'Password saat ini salah.',
-      style: TextStyle(
-        fontFamily: 'Roboto', // Roboto with bold style
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    ),
-    backgroundColor: Colors.red, // Set background color to red
-  ),
-);
-      return;
-    }
-
-    await DatabaseHelper.instance.updatePassword(widget.idPegawai, newPassword);
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('idPegawai');
-    await prefs.remove('password');
-
-     ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Password berhasil diubah.',
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            backgroundColor: Colors.green,
+  if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Harap isi semua kolom.',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
-        );
-
-    Navigator.pop(context);
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
   }
+
+  if (newPassword != confirmPassword) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Password baru dan konfirmasi tidak cocok.',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  if (newPassword == currentPassword) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Password baru tidak boleh sama dengan password saat ini.',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  bool isCurrentPasswordValid = await DatabaseHelper.instance.login(widget.idPegawai, currentPassword);
+  if (!isCurrentPasswordValid) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Password saat ini salah.',
+          style: TextStyle(
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  await DatabaseHelper.instance.updatePassword(widget.idPegawai, newPassword);
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('idPegawai');
+  await prefs.remove('password');
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        'Password berhasil diubah.',
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      backgroundColor: Colors.green,
+    ),
+  );
+
+  Navigator.pop(context);
+}
+
 
   void _launchEmail(String email) async {
   final Uri emailLaunchUri = Uri(
@@ -176,30 +194,28 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.remove('idPegawai');
-              await prefs.remove('password');
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('password');
 
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => LoginPage()),
-                (Route<dynamic> route) => false,
-              );
+  Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (context) => LoginPage()),
+    (Route<dynamic> route) => false,
+  );
 
-              // Show success SnackBar
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Logout berhasil.',
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Logout berhasil.',
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  backgroundColor: Colors.green,
                 ),
-              );
-            },
+                backgroundColor: Colors.green,
+              ),
+            );
+          },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               shape: RoundedRectangleBorder(
